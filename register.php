@@ -4,8 +4,22 @@ include "db_operations.php";
 include "./config/db_connection.php";
 
 if(isset($_POST['submit'])){
-    registerUser($conn, $_POST['email'], $_POST['password'], $_POST['passwordConfirmation']);
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    $passConfirmation = $_POST['passwordConfirmation'];
+    if($email != null  && $password != null && $passConfirmation != null){
+        registerUser($conn, $email, $password, $passConfirmation);
+    }else{
+        $_SESSION['errmessage'] = 'Fill in all boxes';
+    }
 }
+
+global $error;
+if(isset($_SESSION['errmessage'])){
+    $error = $_SESSION['errmessage'];
+}
+
+unset($_SESSION['errmessage']);
 
 mysqli_close($conn);
 
@@ -24,6 +38,7 @@ mysqli_close($conn);
 <body>
     <?php if(!isset($_SESSION['User'])){ ?>
 
+    <p><?php echo $error ?></p>
     <form action="register.php" method="POST">
         <input type="text" name="email" placeholder="Enter email address">
         <input type="password" name="password" placeholder="Create a password">

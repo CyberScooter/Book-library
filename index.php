@@ -22,11 +22,10 @@
 </head>
 <body>
 
-    <form action="index.php" method="GET">
-        <input type="submit" value="Logout" name="Logout">
-    </form>
-
     <?php if(isset($_SESSION['User'])){ ?>
+        <form action="index.php" method="GET">
+            <input type="submit" value="Logout" name="Logout">
+        </form>
         <p> welcome to books list </p>
     <?php }else{ ?>
         <p> Please login or register </p>

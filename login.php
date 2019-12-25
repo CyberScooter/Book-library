@@ -3,6 +3,13 @@
     include "db_operations.php";
     include "./config/db_connection.php";
 
+    global $error;
+    if(isset($_SESSION['errmessage'])){
+        $error = $_SESSION['errmessage'];
+    }
+    
+    unset($_SESSION['errmessage']);
+    
     if(isset($_POST['submit'])){
         loginUser($conn, $_POST['email'], $_POST['password']);
     }
@@ -23,9 +30,10 @@
 <body>
 
     <?php if(!isset($_SESSION['User'])){ ?>
+    <p><?php echo $error ?></p>
     <form action="login.php" method="POST">
-        <input type="text" placeholder="Enter email address">
-        <input type="password" placeholder="Enter password">
+        <input type="text" name="email" placeholder="Enter email address">
+        <input type="password" name="password" placeholder="Enter password">
         <input type="submit" name="submit">
     </form>
 

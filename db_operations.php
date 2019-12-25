@@ -48,10 +48,8 @@ function selectAllUserBooksWithReviews(){
 
 }
 
-function registerUser($conn, $email, $password, $retypedpassword){
-   //below is to check if user not already in session
-   if($password == $retypedpassword){
-      //checks if email already exists in database
+function registerUser($conn, $email, $password, $passwordConfirmation){
+   if($password == $passwordConfirmation){
       $sqlSelect = "SELECT Email FROM users WHERE Email='$email'";
       $result = mysqli_query($conn, $sqlSelect);
       if(mysqli_num_rows($result) == 0){
@@ -63,19 +61,25 @@ function registerUser($conn, $email, $password, $retypedpassword){
             exit();
          }  
       }
+      $_SESSION['errmessage'] = 'User already exists';
       header('Location: register.php');
       exit();
    }
+   $_SESSION['errmessage'] = "Password does not match";
+   header('Location: register.php');
+   exit();
 }
 
 function loginUser($conn, $email, $password){
-   $sqlSelect = "SELECT Email, Hash FROM users WHERE Email='$email'";
-   $userArray = mysqli_fetch_array(mysqli_query($conn, $sqlSelect));
+   $sqlSelect = "SELECT Hash FROM users WHERE Email='$email'";
+   $result = mysqli_query($conn,$sqlSelect);
+   $userArray = mysqli_fetch_array($result, MYSQLI_ASSOC);
    if(password_verify($password, $userArray['Hash'])){
       $_SESSION['User'] = $email;
       header('Location: index.php');
       exit();
    }
+   $_SESSION['errmessage'] = 'User does not exist';
    header('Location: login.php');
    exit();
 }
