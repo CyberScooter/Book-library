@@ -1,4 +1,5 @@
 <?php
+    session_start();
 
     include "db_operations.php";
     include "./config/db_connection.php";
@@ -6,9 +7,10 @@
     global $error;
     if(isset($_SESSION['errmessage'])){
         $error = $_SESSION['errmessage'];
+        unset($_SESSION['errmessage']);
     }
     
-    unset($_SESSION['errmessage']);
+
     
     if(isset($_POST['submit'])){
         loginUser($conn, $_POST['email'], $_POST['password']);
@@ -19,15 +21,7 @@
 ?>
 
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-</head>
-<body>
+<?php include './templates/header.php'; ?>
 
     <?php if(!isset($_SESSION['User'])){ ?>
     <p><?php echo $error ?></p>
@@ -42,5 +36,5 @@
 
 
     <?php } ?>
-</body>
-</html>
+
+<?php include './templates/footer.php'; ?>

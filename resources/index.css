@@ -1,0 +1,100 @@
+
+
+.Button {
+    display: inline-block;
+    padding: 10px 25px;
+    font-size: 2rem;
+    background-color: #002A32;
+    margin: 5px;
+    border-radius: 0.2rem;
+    color: #9EA3B0;
+    text-decoration: none;
+    opacity: 1;
+}
+
+.Button:hover {
+    color:white;
+    transition: 0.3s;
+}
+
+.Picture {
+  width: 100px;
+  margin: auto;
+}
+
+.User {
+  font-weight: bold;
+}
+
+
+.ProfilePicture {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.active {
+    background-color: #82929F;
+}
+
+.container {
+    margin: 1% 5%;
+    background-color: #82929F;
+    opacity: 0.9;
+    text-align: center;
+    border-radius: 0.4rem;
+    padding: 10px 0px;
+}
+
+.TextBox{
+  margin: 10px 0px;
+  width: 80%;
+  padding: 1rem;
+  font-size: large;
+  border:none;
+  border-left: 7px solid #455765;
+  background-color: #D2D5DB;
+  box-shadow: 1px 1px 4px;
+}
+
+.Search {
+  width: 80%;
+  height: 3rem;
+  font-size: 2rem;
+  background-color: #D2D5DB;
+  border: none;
+  box-shadow: 1px 1px 4px;
+  margin-bottom: 30px;
+}
+
+
+/* NAVBAR CSS */
+
+.nav {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #546A7B;
+  }
+body {
+      padding: 0;
+      margin: 0;
+      background-image: url("./pexels_bgimage.jpg");
+}
+.nav li {
+    float: left;
+  }
+  
+.nav li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+  }
+  
+.nav li a:hover {
+    background-color: #455765;
+    transition: 0.3s;
+  }

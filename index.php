@@ -1,36 +1,40 @@
 <?php
     session_start();
+    
+    include "./db_operations.php";
+    include "./config/db_connection.php";
 
-    //CHANGE 'User' to a session ID ELSE IT WILL DELETE ALL SESSIONS IF MULTIPLE USERS USE IT
-    if(isset($_GET['Logout'])){
+    if(isset($_GET['logout'])){
         unset($_SESSION['User']);
         header('Location: index.php');
     }
+
+    if(isset($_GET['profile'])){
+        header('Location: ./profile/index.php');
+    }
+
+    global $username;
+    if(isset($_SESSION['User'])){
+        $username = getUsernameFromUsersTable($conn, $_SESSION['User']);
+    }
+
+
+    
     
 
 ?>
 
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-</head>
-<body>
+<?php include './templates/header.php'; ?>
 
     <?php if(isset($_SESSION['User'])){ ?>
-        <form action="index.php" method="GET">
-            <input type="submit" value="Logout" name="Logout">
-        </form>
-        <p> welcome to books list </p>
+        <div class="container">
+            <h1> Welcome <span class="User"><?php echo $username ?></span> to the Books list </h1>
+            <h1> A place to store reviews for books and manage the books you are reading!</h1>
+        </div>
     <?php }else{ ?>
-        <p> Please login or register </p>
+        <h1> Welcome to the Books list </h1>
+        <h1> A place to store reviews for books and manage the books you are reading!</h1>
+        <h1> In order to start using the site please register or login above! </h1>
     <?php } ?>
 
-
-</body>
-</html>
+<?php include './templates/footer.php'; ?>

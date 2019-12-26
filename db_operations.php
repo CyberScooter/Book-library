@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 function addBook($conn,$isbn, $title, $description){
    $sql = "INSERT INTO books(ISBN,Title,Description) VALUES('$isbn','$title','$description')";
@@ -48,18 +47,23 @@ function selectAllUserBooksWithReviews(){
 
 }
 
-function registerUser($conn, $email, $password, $passwordConfirmation){
+function registerUser($conn, $email, $password, $passwordConfirmation, $username){
    if($password == $passwordConfirmation){
-      $sqlSelect = "SELECT Email FROM users WHERE Email='$email'";
-      $result = mysqli_query($conn, $sqlSelect);
-      if(mysqli_num_rows($result) == 0){
-         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-         $sqlInsert = "INSERT INTO users(Email,Hash) VALUES('$email','$hashedPassword')";
-         if(mysqli_query($conn, $sqlInsert)){
-            $_SESSION['User'] = $email;
-            header('Location: index.php');
-            exit();
-         }  
+      $sqlSelectEmail = "SELECT Email FROM users WHERE Email='$email'";
+      $resultEmail = mysqli_query($conn, $sqlSelectEmail);
+      if(mysqli_num_rows($resultEmail) == 0){
+         $sqlSelectUsername = "SELECT Username FROM profile WHERE Username='$username'";
+         $resultUsername = mysqli_query($conn, $sqlSelectUsername);
+         if(mysqli_num_rows($resultUsername) == 0){
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $sqlInsertUser = "INSERT INTO users(Email,Username,Hash) VALUES('$email','$username','$hashedPassword')";
+            $sqlInsertProfile = "INSERT INTO profile(Username) VALUES('$username')";
+            if(mysqli_query($conn, $sqlInsertUser) && mysqli_query($conn, $sqlInsertProfile)){
+               $_SESSION['User'] = $email;
+               header('Location: index.php');
+               exit();
+            }  
+         }
       }
       $_SESSION['errmessage'] = 'User already exists';
       header('Location: register.php');
@@ -82,6 +86,44 @@ function loginUser($conn, $email, $password){
    $_SESSION['errmessage'] = 'User does not exist';
    header('Location: login.php');
    exit();
+}
+
+function getUsernameFromUsersTable($conn, $email){
+   $sqlSelect = "SELECT Username FROM users WHERE Email='$email'";
+   $result = mysqli_query($conn, $sqlSelect);
+   $userArray = mysqli_fetch_array($result, MYSQLI_ASSOC);
+   return $userArray['Username'];
+}
+
+function updateProfile($conn, $email, $dataArray){
+   $username = getUsernameFromUsersTable($conn, $email);
+   $bio = $dataArray['Bio'];
+   $picture = $dataArray['Picture'];
+   $sqlUpdateProfile = "UPDATE profile SET Bio='$bio', Picture='$picture' WHERE Username='$username'";
+   if(mysqli_query($conn, $sqlUpdateProfile)){
+      header('Location: index.php');
+      exit();
+   }
+   header('Location: edit.php');
+   exit();
+}
+
+function getProfileData($conn, $email){
+   $username = getUsernameFromUsersTable($conn, $email);
+   $sqlSelectProfile = "SELECT Username,Bio,Picture FROM profile WHERE Username='$username'";
+   $result = mysqli_query($conn, $sqlSelectProfile);
+   return mysqli_fetch_array($result, MYSQLI_ASSOC);
+
+}
+
+function searchUser($conn, $username){
+   $sqlSelectProfile = "SELECT Username,Bio,Picture FROM profile WHERE Username='$username'";
+   $result = mysqli_query($conn, $sqlSelectProfile);
+   return mysqli_fetch_array($result, MYSQLI_ASSOC);
+}
+
+function getBooksData($conn){
+
 }
 
 ?>
