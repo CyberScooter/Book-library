@@ -6,10 +6,12 @@
     font-size: 2rem;
     background-color: #002A32;
     margin: 5px;
-    border-radius: 0.2rem;
+    border: 1px solid #455765;
     color: #9EA3B0;
     text-decoration: none;
     opacity: 1;
+    border-radius: 0.5rem;
+    cursor: pointer;
 }
 
 .Button:hover {
@@ -45,8 +47,27 @@
     border-radius: 0.4rem;
     padding: 10px 0px;
 }
-
 .TextBox{
+  display: block;
+  margin: 20px auto;
+  width: 80%;
+  padding: 1rem;
+  font-size: large;
+  border:none;
+  border: 1px solid #455765;
+  background-color: #D2D5DB;
+  box-shadow: 1px 1px 4px;
+
+
+}
+
+.error{
+  color:red;
+  font-size: 2rem;
+
+}
+
+.SearchBox{
   margin: 10px 0px;
   width: 80%;
   padding: 1rem;

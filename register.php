@@ -33,13 +33,13 @@ mysqli_close($conn);
 
     <?php if(!isset($_SESSION['User'])){ ?>
 
-    <p><?php echo $error ?></p>
+    <p class="error"><?php echo $error ?></p>
     <form action="register.php" method="POST">
-        <input type="text" name="username" placeholder="Enter username">
-        <input type="text" name="email" placeholder="Enter email address">
-        <input type="password" name="password" placeholder="Create a password">
-        <input type="password" name="passwordConfirmation" placeholder="Retype password">
-        <input type="submit" name="submit">
+        <input class="TextBox" type="text" name="username" placeholder="Enter username">
+        <input class="TextBox" type="text" name="email" placeholder="Enter email address">
+        <input class="TextBox" type="password" name="password" placeholder="Create a password">
+        <input class="TextBox" type="password" name="passwordConfirmation" placeholder="Retype password">
+        <input class="Button" type="submit" name="submit" value="Register">
     </form>
 
     <?php }else{ ?>

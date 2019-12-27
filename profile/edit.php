@@ -20,11 +20,11 @@ if(isset($_SESSION['User'])){
 <?php include '../templates/header.php'; ?>
 
     <?php if(isset($_SESSION['User'])) { ?>
-    <h1> UPDATE PROFILE </h1>
+    <h1> Update Profile </h1>
     <form action="edit.php" method="POST">
-        <input type="text" name="bio" value="<?php echo $profileData['Bio'] ?>" >
-        <input type="text" name="picture" value = "<?php echo $profileData['Picture'] ?>">
-        <input type="submit" name="update" value="Update">
+        <input class="TextBox" type="text" placeholder="Enter new bio" name="bio" value="<?php echo $profileData['Bio'] ?>" >
+        <input class="TextBox" type="text" placeholder="Enter Web URL of new picture" name="picture" value = "<?php echo $profileData['Picture'] ?>">
+        <input class="Button" type="submit" name="update" value="Update">
     </form>
 
     <?php }else{ ?>

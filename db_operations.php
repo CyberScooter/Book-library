@@ -49,21 +49,17 @@ function selectAllUserBooksWithReviews(){
 
 function registerUser($conn, $email, $password, $passwordConfirmation, $username){
    if($password == $passwordConfirmation){
-      $sqlSelectEmail = "SELECT Email FROM users WHERE Email='$email'";
-      $resultEmail = mysqli_query($conn, $sqlSelectEmail);
-      if(mysqli_num_rows($resultEmail) == 0){
-         $sqlSelectUsername = "SELECT Username FROM profile WHERE Username='$username'";
-         $resultUsername = mysqli_query($conn, $sqlSelectUsername);
-         if(mysqli_num_rows($resultUsername) == 0){
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $sqlInsertUser = "INSERT INTO users(Email,Username,Hash) VALUES('$email','$username','$hashedPassword')";
-            $sqlInsertProfile = "INSERT INTO profile(Username) VALUES('$username')";
-            if(mysqli_query($conn, $sqlInsertUser) && mysqli_query($conn, $sqlInsertProfile)){
-               $_SESSION['User'] = $email;
-               header('Location: index.php');
-               exit();
-            }  
-         }
+      $sqlSelectInnerJoin = "SELECT users.Email, users.Username FROM users INNER JOIN profile ON profile.Username = users.Username WHERE users.Email='$email' AND profile.Username='$username'";
+      $result = mysqli_query($conn, $sqlSelectInnerJoin);
+      if(mysqli_num_rows($result) == 0){
+         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+         $sqlInsertUser = "INSERT INTO users(Email,Username,Hash) VALUES('$email','$username','$hashedPassword')";
+         $sqlInsertProfile = "INSERT INTO profile(Username) VALUES('$username')";
+         if(mysqli_query($conn, $sqlInsertUser) && mysqli_query($conn, $sqlInsertProfile)){
+            $_SESSION['User'] = $email;
+            header('Location: index.php');
+            exit();
+         }  
       }
       $_SESSION['errmessage'] = 'User already exists';
       header('Location: register.php');
@@ -109,8 +105,7 @@ function updateProfile($conn, $email, $dataArray){
 }
 
 function getProfileData($conn, $email){
-   $username = getUsernameFromUsersTable($conn, $email);
-   $sqlSelectInnerJoin = "SELECT profile.Username, profile.Bio, profile.Picture FROM profile INNER JOIN users ON profile.Username = users.Username WHERE profile.Username='$username'";
+   $sqlSelectInnerJoin = "SELECT profile.Username, profile.Bio, profile.Picture FROM profile INNER JOIN users ON profile.Username = users.Username WHERE users.Email='$email'";
    $result = mysqli_query($conn, $sqlSelectInnerJoin);
    return mysqli_fetch_array($result, MYSQLI_ASSOC);
 
@@ -122,8 +117,76 @@ function searchUser($conn, $username){
    return mysqli_fetch_array($result, MYSQLI_ASSOC);
 }
 
-function getBooksData($conn){
+//TEST METHOD
+function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating){
+   $releaseDateSQL=date("Y-m-d",strtotime($releaseDate));
+   $authorDOBSQL=date("Y-m-d",strtotime($authorDOB));
 
+
+   $sqlInsertReview = "INSERT INTO reviews(ISBN,Review,Rating,Visible) VALUES('$isbn','$review','$rating',true)";
+   if (mysqli_query($conn, $sqlInsertReview)) {
+      $reviewID = mysqli_insert_id($conn);
+   }
+   $sqlInsertPages = "INSERT INTO page(Page,TotalPages) VALUES('$totalPages','$pagesRead')";
+   if (mysqli_query($conn, $sqlInsertPages)){
+      $pageID = mysqli_insert_id($conn);
+   }
+
+   $sqlInsertBook = "INSERT INTO books(ISBN, Author, Title, DateReleased, Description) VALUES('$isbn','$author','$title','$releaseDateSQL','$description')";
+   mysqli_query($conn, $sqlInsertBook);
+
+   $sqlInsertUserBooks = "INSERT INTO usersbooks(ReviewID, Email, PageID) VALUES('$reviewID','$email','$pageID')";
+   mysqli_query($conn, $sqlInsertUserBooks);
+
+   $sqlInsertAuthor = "INSERT INTO author(Name, DOB) VALUES('$author', '$authorDOBSQL')";
+   mysqli_query($conn, $sqlInsertAuthor);
+
+   header('Location: /coursework/profile/index.php');
+   exit();
+   
+}
+
+//TEST METHOD
+function getBookReview($conn, $username){
+   $userBooksArray = array();
+   $bookReviewArray = array();
+   $bookDetailsArray = array();
+
+   $sqlSelectUserBooks = "SELECT usersbooks.ReviewID, usersbooks.Email, usersbooks.PageID FROM users INNER JOIN usersbooks
+                           ON users.Email = usersbooks.Email WHERE users.Username='$username'";
+   $resultUserBooks = mysqli_query($conn, $sqlSelectUserBooks);
+
+   while($row = mysqli_fetch_assoc($resultUserBooks)) {
+      $userBooksArray[] = $row;
+   }
+
+   //try for default for loop with index number if this loop doesnt work
+   foreach($userBooksArray as $i => $item){
+      $reviewID = $userBooksArray[$i]['ReviewID'];
+      $sqlSelectBookReview = "SELECT ISBN, Review, Rating, Visible FROM reviews WHERE ID='$reviewID'";
+      $resultBookReview = mysqli_query($conn, $sqlSelectBookReview);
+
+      //should only be one row per review id so this only goes through once
+      while($row = mysqli_fetch_assoc($resultBookReview)) {
+         $bookReviewArray[$i]['ISBN'] = $row['ISBN'];
+         $bookReviewArray[$i]['Review'] = $row['Review'];
+         $bookReviewArray[$i]['Rating'] = $row['Rating'];
+         $bookReviewArray[$i]['Visible'] = $row['Visible'];
+      }
+
+      $isbn = $bookReviewArray[$i]['ISBN'];
+      $sqlSelectBookDetails = "SELECT Author, Title, DateReleased, Description FROM books WHERE ISBN='$isbn'";
+      $resultBookDetails = mysqli_query($conn, $sqlSelectBookDetails);
+
+      //should only be one row per review id so this only goes through once
+      while($row = mysqli_fetch_assoc($resultUserBooks)) {
+         $bookDetailsArray[$i]['Author'] = $row['Author'];
+         $bookDetailsArray[$i]['Title'] = $row['Title'];
+         $bookDetailsArray[$i]['DateReleased'] = $row['DateReleased'];
+      }
+   }
+
+   return array($userBooksArray, $bookReviewArray, $bookDetailsArray);
 }
 
 ?>
