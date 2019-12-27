@@ -110,8 +110,8 @@ function updateProfile($conn, $email, $dataArray){
 
 function getProfileData($conn, $email){
    $username = getUsernameFromUsersTable($conn, $email);
-   $sqlSelectProfile = "SELECT Username,Bio,Picture FROM profile WHERE Username='$username'";
-   $result = mysqli_query($conn, $sqlSelectProfile);
+   $sqlSelectInnerJoin = "SELECT profile.Username, profile.Bio, profile.Picture FROM profile INNER JOIN users ON profile.Username = users.Username WHERE profile.Username='$username'";
+   $result = mysqli_query($conn, $sqlSelectInnerJoin);
    return mysqli_fetch_array($result, MYSQLI_ASSOC);
 
 }

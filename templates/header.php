@@ -11,7 +11,10 @@
 <body>
     
     <ul class="nav">
-        <?php echo (isset($_SESSION['User'])) ? '<li><a class="User">< echo $username = getUsernameFromUsersTable($conn, $_SESSION["User"]) </a></li>' : NULL ?>
+        <?php if(isset($_SESSION['User'])){ ?>
+            <?php $username = getUsernameFromUsersTable($conn, $_SESSION["User"]) ?>
+            <?php echo "<li><a class='User'> $username </a></li>" ?>
+        <?php } ?>
         <li><a <?php echo ($_SERVER['REQUEST_URI'] == "/coursework/index.php") ? 'class="active"' : NULL ?> href="/coursework/index.php">Home</a></li>
 
         <?php if(isset($_SESSION['User'])) { ?>
