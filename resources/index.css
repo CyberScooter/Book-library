@@ -39,6 +39,10 @@
     background-color: #82929F;
 }
 
+.BookReview p{
+  font-size: 5rem;
+}
+
 .container {
     margin: 1% 5%;
     background-color: #82929F;

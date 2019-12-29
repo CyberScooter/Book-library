@@ -17,7 +17,11 @@
         $pagesRead = $_POST['pagesRead'];
         $review = $_POST['review'];
         $rating = $_POST['rating'];
-        saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating);
+        $picture = $_POST['fileinput'];
+        if($pagesRead == $totalPages){
+            $showReviewInputs = true;
+        }
+        saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating, $picture);
     }
 
 
@@ -38,6 +42,7 @@
             <input class="TextBox" type="text" placeholder="Enter author DOB in (yyyy-mm-dd) format" name="authorDOB">
             <input class="TextBox" type="text" placeholder="Enter total pages" name="totalPages">
             <input class="TextBox" type="text" placeholder="Enter pages read" name="pagesRead">
+            <input class="TextBox" type="file" name="fileinput"/>
             <?php if($showReviewInputs){ ?>
             <input class="TextBox" type="text" placeholder="Enter review" name="review">
             <input class="TextBox" type="text" placeholder="Enter rating" name="rating">

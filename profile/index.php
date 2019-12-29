@@ -12,6 +12,10 @@ if(isset($_GET['user'])){
     //also get books data of that user
 }
 
+if(isset($_GET['fileinput'])){
+    echo $_GET['fileinput'];
+}
+
 if(isset($_SESSION['User']) && !isset($_GET['user'])){
     $profileData = getProfileData($conn, $_SESSION['User']);
     //also get books data of that user
@@ -25,12 +29,13 @@ if(isset($_POST['edit'])){
 
 
 //test this :
-$username = getUsernameFromUsersTable($conn, $_SESSION['User']);
-global $ua;
-global $bra;
-global $bda;
 
-list($ua, $bra, $bda) = getBookReview($conn, $username);
+global $userBooksArray;
+global $bookReviewArray;
+global $bookDetailsArray;
+
+list($userBooksArray, $bookReviewArray, $bookDetailsArray) = getAllUserBookReviews($conn, $_SESSION['User']);
+
 
 
 
@@ -64,8 +69,26 @@ list($ua, $bra, $bda) = getBookReview($conn, $username);
 
     <h2> Books: </h2>
     <?php echo (!isset($_GET['user'])) ? '<a class="Button" href="../book/add.php"> Add Book </a>' : NULL ?>
-    <p> <?php echo $ua[0]['Email'] ?> </p>
-    <p> <?php echo  $bra[0]['Review'] ?> </p>
+    <?php if(isset($userBooksArray)){ ?>
+    <?php   foreach($userBooksArray as $i => $item){ ?>
+    <div class="BookReview">
+    <?php if((!$bookReviewArray[$i]['Visible'] && isset($_GET['user'])) || ($bookReviewArray[$i]['Visible'] && !isset($_GET['user'])) || (!$bookReviewArray[$i]['Visible'] && !isset($_GET['user']))  ){ ?>
+        <p>ISBN: <?php echo $bookReviewArray[$i]['ISBN'] ?></p>
+        <p>Title: <?php echo $bookDetailsArray[$i]['Title'] ?></p>
+        <p> <img src="/coursework/resources/books/<?php echo $bookDetailsArray[$i]['Picture'] ?>" /></p>
+        <p>Description: <?php echo $bookDetailsArray[$i]['Description'] ?></p>
+        <p>Author: <?php echo $bookDetailsArray[$i]['Author'] ?></p>
+        <p>Date released: <?php echo $bookDetailsArray[$i]['DateReleased'] ?></p>
+        <?php if($bookReviewArray[$i]['Review'] != null){ ?>
+            <p>Review: <?php echo $bookReviewArray[$i]['Review']?></p>
+            <p>Rating: <?php echo $bookReviewArray[$i]['Rating']?></p>
+        <?php } ?>
+        <a class="Button" href="/coursework/book/edit.php?id=<?php echo $userBooksArray[$i]['ID'] ?>"> Edit book </a>
+        <hr>
+    <?php } ?>
+    </div>
+    <?php   } ?>
+    <?php } ?>
 
     <?php }else { ?>
         <h1> Login/register required </h1>
