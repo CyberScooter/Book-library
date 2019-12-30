@@ -9,22 +9,28 @@
         $email = $_SESSION['User'];
         $isbn = $_POST['isbn'];
         $title = $_POST['title'];
-        $releaseDate = $_POST['releaseDate'];
+        $releaseDate = $_POST['releasedDate'];
         $description = $_POST['description'];
         $author = $_POST['author'];
         $authorDOB = $_POST['authorDOB'];
         $totalPages = $_POST['totalPages'];
         $pagesRead = $_POST['pagesRead'];
-        $review = $_POST['review'];
-        $rating = $_POST['rating'];
         $picture = $_POST['fileinput'];
+        if(isset($_POST['review'])){
+            $review = $_POST['review'];
+            $rating = $_POST['rating'];
+        }else {
+            $review = NULL;
+            $rating = 0;
+        }
         if($pagesRead == $totalPages){
             $showReviewInputs = true;
         }
-        saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating, $picture);
+        if($pagesRead <= $totalPages && $email != null && $isbn != null && $title != null && $releaseDate && $description != null && $author != null && $authorDOB != null && $totalPages != null && $pagesRead != null){
+            saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating, $picture);
+        }
+
     }
-
-
 ?>
 
 

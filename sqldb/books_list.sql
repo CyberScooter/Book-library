@@ -54,6 +54,7 @@ CREATE TABLE comments (
 
 CREATE TABLE posts (
   ID int PRIMARY KEY AUTO_INCREMENT,
+  User varchar(255),
   CommentID int NOT NULL,
   ReviewID int NOT NULL,
   created_at datetime DEFAULT (now())
@@ -74,3 +75,5 @@ ALTER TABLE usersbooks ADD FOREIGN KEY (PageID) REFERENCES pages (ID);
 ALTER TABLE posts ADD FOREIGN KEY (CommentID) REFERENCES comments (ID);
 
 ALTER TABLE posts ADD FOREIGN KEY (ReviewID) REFERENCES reviews (ID);
+
+ALTER TABLE posts ADD FOREIGN KEY (User) REFERENCES users (Email);

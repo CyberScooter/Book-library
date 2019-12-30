@@ -1,52 +1,5 @@
 <?php
 
-function addBook($conn,$isbn, $title, $description){
-   $sql = "INSERT INTO books(ISBN,Title,Description) VALUES('$isbn','$title','$description')";
-   if(mysqli_query($conn, $sql)){
-      header('Location: index.php');
-   }else {
-      echo 'Query error' . mysqli_error($conn);
-   }
-}
-
-function removeBook($bookID)
-{
-   //remove book if ISBN is not in reviews table, run everytime review is removed
-   return $num;
-}
-
-function addReview($email, $reviewID, $review, $rating, $isbn, $title, $description){
-   //checking if a session exists
-   if(isset($_SESSION['User'])){
-      $sql = "INSERT INTO books(ISBN,Title,Description) VALUES('$isbn','$title','$description')";
-      if(mysqli_query($conn, $sql)){
-         header('Location: index.php');
-      }else {
-         echo 'Query error' . mysqli_error($conn);
-      }
-
-      
-   }
-}
-
-//view detailed review for specific post for AUTHORISED user, not any
-//figure out how to do this by getting id from url
-function viewDetailedReview($email ){
-
-}
-
-
-//use inner join to remove data from review table and bookslists table
-//check for right join if it works
-function removeReview($email, $reviewID){
-
-}
-
-//for index page
-function selectAllUserBooksWithReviews(){
-
-}
-
 function registerUser($conn, $email, $password, $passwordConfirmation, $username){
    if($password == $passwordConfirmation){
       //adding multiple record to profile table if email is the same but username is different, FIX!
@@ -133,7 +86,7 @@ function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description
    $sqlInsertBook = "INSERT INTO books(ISBN, Author, Title, DateReleased, Description, Picture) VALUES('$isbn','$author','$title','$releaseDateSQL','$description','$picture')";
    mysqli_query($conn, $sqlInsertBook);
 
-   $sqlInsertPages = "INSERT INTO pages(Page,TotalPages) VALUES('$totalPages','$pagesRead')";
+   $sqlInsertPages = "INSERT INTO pages(TotalPages, Page) VALUES('$totalPages','$pagesRead')";
    if (mysqli_query($conn, $sqlInsertPages)){
       $pageID = mysqli_insert_id($conn);
    }
@@ -202,10 +155,64 @@ function getAllUserBookReviews($conn, $username){
          $pagesDetailsArray[$i]['Page'] = $row['Page'];
          $pagesDetailsArray[$i]['TotalPages'] = $row['TotalPages'];
       }
+
    }
 
    return array($userBooksArray, $bookReviewArray, $bookDetailsArray, $pagesDetailsArray);
 }
+
+function selectCommentsFromReview($conn, $reviewID){
+   $user = array();
+   $comments = array();
+   $dateCreated = array();
+   $commentIDs = array();
+
+   $sqlSelectCommentID = "SELECT User, CommentID, created_at FROM posts WHERE ReviewID='$reviewID'";
+   $resultCommentID = mysqli_query($conn, $sqlSelectCommentID);
+
+   while($row = mysqli_fetch_assoc($resultCommentID)){
+      $username = getUsernameFromUsersTable($conn, $row['User']);
+      $commentID = $row['CommentID'];
+      $created_at = $row['created_at'];
+      $sqlSelectComment = "SELECT Comment FROM comments WHERE ID='$commentID'";
+      $resultComment = mysqli_query($conn, $sqlSelectComment);
+      while($row = mysqli_fetch_assoc($resultComment)){
+         array_push($comments, $row['Comment']);
+         array_push($dateCreated, $created_at);
+         array_push($user, $username);
+         array_push($commentIDs, $commentID);
+      }
+
+   }
+
+   return array($comments, $dateCreated, $user, $commentIDs);
+}
+
+function insertNewComment($conn, $email, $reviewID, $comment){
+   $sqlInsertComment = "INSERT INTO comments(Comment) VALUES('$comment')";
+   if(mysqli_query($conn, $sqlInsertComment)){
+      $id = mysqli_insert_id($conn);
+   }
+
+   $sqlInsertToPosts = "INSERT INTO posts(User, CommentID, ReviewID) VALUES('$email','$id','$reviewID')";
+   $result = mysqli_query($conn, $sqlInsertToPosts);
+}
+
+function deleteComment($conn, $email, $commentID){
+   $sqlDeleteComment =  "DELETE FROM comments WHERE ID='$commentID'";
+   $resultDeleteComment = mysqli_query($conn, $sqlDeleteComment);
+
+   // Getting primary key directly from posts table of a specific comment so that It can be deleted directly which in result deletes the whole record
+   $sqlSelectPostsID = "SELECT ID FROM posts WHERE CommentID='$commentID'";
+   $resultSelectPostsID = mysqli_query($conn, $sqlSelectPostsID);
+   $postsIDArray = mysqli_fetch_array($resultSelectPostsID, MYSQLI_ASSOC);
+   $postID = $postsIDArray['ID'];
+
+   $sqlDeletePostID = "DELETE FROM posts WHERE ID='$postID'";
+   $resultDeletePostID = mysqli_query($conn, $sqlDeletePostID);
+
+}
+
 
 //check why this is not working
 function getOneUserBookReview($conn, $email, $id){
@@ -281,6 +288,13 @@ function checkPagesReadAndTotalPagesEqual($conn, $id, $email){
 function deleteBooksReview(){
 
 }
+
+function errorRedirect(){
+   $_SESSION['errmessage'] = 'Error description: ' . mysqli_error($conn);
+   header('Location: /coursework/index.php');
+}
+
+
 
 
 

@@ -65,6 +65,31 @@
 
 }
 
+.DeleteComment {
+  display:flex;
+  justify-content: start;
+  color:darkred;
+  width:fit-content;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.DeleteComment:hover{
+  text-decoration: underline;
+}
+
+.Comment {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.4rem;
+}
+
+.BoldComment{
+  font-weight: bold;
+}
+
 #FixedTextBox{
   background-color: #ffcccc ;
 }
