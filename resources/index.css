@@ -40,7 +40,7 @@
 }
 
 .BookReview p{
-  font-size: 5rem;
+  font-size: 2rem;
 }
 
 .container {
@@ -63,6 +63,10 @@
   box-shadow: 1px 1px 4px;
 
 
+}
+
+#FixedTextBox{
+  background-color: #ffcccc ;
 }
 
 .error{
@@ -106,6 +110,8 @@ body {
       padding: 0;
       margin: 0;
       background-image: url("./pexels_bgimage.jpg");
+      background-repeat: no-repeat;
+      background-attachment: fixed;
 }
 .nav li {
     float: left;

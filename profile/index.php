@@ -33,11 +33,15 @@ if(isset($_POST['edit'])){
 global $userBooksArray;
 global $bookReviewArray;
 global $bookDetailsArray;
-
-list($userBooksArray, $bookReviewArray, $bookDetailsArray) = getAllUserBookReviews($conn, $_SESSION['User']);
-
-
-
+global $pagesDetailsArray;
+if(!isset($_GET['user'])){
+    $username = getUsernameFromUsersTable($conn, $_SESSION['User']);
+    list($userBooksArray, $bookReviewArray, $bookDetailsArray, $pagesDetailsArray) = getAllUserBookReviews($conn, $username);
+}else {
+    //else display books for the user
+    $username = getUsernameFromUsersTable($conn, $_GET['user']);
+    list($userBooksArray, $bookReviewArray, $bookDetailsArray, $pagesDetailsArray) = getAllUserBookReviews($conn, $username);
+}
 
 ?>
 
@@ -73,17 +77,20 @@ list($userBooksArray, $bookReviewArray, $bookDetailsArray) = getAllUserBookRevie
     <?php   foreach($userBooksArray as $i => $item){ ?>
     <div class="BookReview">
     <?php if((!$bookReviewArray[$i]['Visible'] && isset($_GET['user'])) || ($bookReviewArray[$i]['Visible'] && !isset($_GET['user'])) || (!$bookReviewArray[$i]['Visible'] && !isset($_GET['user']))  ){ ?>
+        
         <p>ISBN: <?php echo $bookReviewArray[$i]['ISBN'] ?></p>
         <p>Title: <?php echo $bookDetailsArray[$i]['Title'] ?></p>
         <p> <img src="/coursework/resources/books/<?php echo $bookDetailsArray[$i]['Picture'] ?>" /></p>
         <p>Description: <?php echo $bookDetailsArray[$i]['Description'] ?></p>
         <p>Author: <?php echo $bookDetailsArray[$i]['Author'] ?></p>
         <p>Date released: <?php echo $bookDetailsArray[$i]['DateReleased'] ?></p>
-        <?php if($bookReviewArray[$i]['Review'] != null){ ?>
+        <p>Read <?php echo $pagesDetailsArray[$i]['Page'] ?> out of <?php echo $pagesDetailsArray[$i]['TotalPages'] ?> pages in the book</p>
+
+        <?php if( (int) $pagesDetailsArray[$i]['Page'] == (int) $pagesDetailsArray[$i]['TotalPages']   ){ ?>
             <p>Review: <?php echo $bookReviewArray[$i]['Review']?></p>
             <p>Rating: <?php echo $bookReviewArray[$i]['Rating']?></p>
         <?php } ?>
-        <a class="Button" href="/coursework/book/edit.php?id=<?php echo $userBooksArray[$i]['ID'] ?>"> Edit book </a>
+        <a class="Button" href="/coursework/book/edit.php?id=<?php echo $userBooksArray[$i]['ID'] ?>"> Update </a>
         <hr>
     <?php } ?>
     </div>
