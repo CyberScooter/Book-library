@@ -12,6 +12,7 @@ function registerUser($conn, $email, $password, $passwordConfirmation, $username
          $sqlInsertProfile = "INSERT INTO profile(Username) VALUES('$username')";
          if(mysqli_query($conn, $sqlInsertProfile)){
             if(mysqli_query($conn, $sqlInsertUser)){
+               insertStandardUser($conn, $email); 
                $_SESSION['User'] = $email;
                header('Location: index.php');
                exit();
@@ -25,6 +26,19 @@ function registerUser($conn, $email, $password, $passwordConfirmation, $username
    $_SESSION['errmessage'] = "Password does not match";
    header('Location: register.php');
    exit();
+}
+
+function insertStandardUser($conn, $email){
+   $sqlInsertStandard = "INSERT INTO standard(Email, BooksLimit, PrivatePosts) VALUES('$email', 5, 2)";
+   $result = mysqli_query($conn, $sqlInsertStandard);
+}
+
+function upgradeToPremium($conn, $email){
+   $sqlInsertPremium = "INSERT INTO premium(Email) VALUES('$email')";
+   $resultInsert = mysqli_query($conn, $sqlInsertPremium);
+
+   $sqlDeleteStandard = "DELETE FROM standard WHERE Email='$email'";
+   $resultDelete = mysqli_query($conn , $sqlDeleteStandard);
 }
 
 function loginUser($conn, $email, $password){
@@ -48,7 +62,15 @@ function getUsernameFromUsersTable($conn, $email){
    return $userArray['Username'];
 }
 
-function updateProfile($conn, $email, $dataArray){
+function updateProfile($conn, $email, $dataArray, $backgroundImageURL, $badgeURL, $premium){
+   if($premium){
+      $sqlUpdatePremium = "UPDATE premium SET BadgeURL='$badgeURL',BackgroundURL='$backgroundImageURL' WHERE Email='$email'";
+      if(mysqli_query($conn, $sqlUpdatePremium)){
+         $_SESSION['bg-image'] = $backgroundImageURL;
+         header('Location: index.php');
+         exit();
+      }
+   }
    $username = getUsernameFromUsersTable($conn, $email);
    $bio = $dataArray['Bio'];
    $picture = $dataArray['Picture'];
@@ -62,9 +84,20 @@ function updateProfile($conn, $email, $dataArray){
 }
 
 function getProfileData($conn, $email){
+   $badgeData = array();
    $sqlSelectInnerJoin = "SELECT profile.Username, profile.Bio, profile.Picture FROM profile INNER JOIN users ON profile.Username = users.Username WHERE users.Email='$email'";
-   $result = mysqli_query($conn, $sqlSelectInnerJoin);
-   return mysqli_fetch_array($result, MYSQLI_ASSOC);
+   if(checkIfPremiumUser($conn, $email)){
+      $sqlSelectBadge = "SELECT BadgeURL FROM premium WHERE Email='$email'";
+      $resultBadge = mysqli_query($conn, $sqlSelectBadge);
+      $badgeData = mysqli_fetch_array($resultBadge, MYSQLI_ASSOC);
+   }
+   $resultInnerJoin = mysqli_query($conn, $sqlSelectInnerJoin);
+   $profileData = mysqli_fetch_array($resultInnerJoin, MYSQLI_ASSOC);
+   
+   return array_merge($badgeData, $profileData);   
+   
+
+
 
 }
 
@@ -74,30 +107,78 @@ function searchUser($conn, $username){
    return mysqli_fetch_array($result, MYSQLI_ASSOC);
 }
 
+function checkExistingBook($conn, $email, $isbn){
+   $sqlSelectBook = "SELECT ISBN FROM books WHERE ISBN='$isbn'";
+   $resultBook = mysqli_query($conn, $sqlSelectBook);
+   if(mysqli_num_rows($resultBook) != 0){
+      return true;
+   }
+   return false;
+}
+
+function setBackgroundURL($conn, $email){
+   $sqlSelectBackground = "SELECT BackgroundURL FROM premium WHERE Email='$email'";
+   if($result = mysqli_query($conn, $sqlSelectBackground)){
+      $backgroundArray = mysqli_fetch_array($result, MYSQLI_ASSOC);
+      $_SESSION['bg-image'] = $backgroundArray['BackgroundURL'];
+      header('Location: /coursework/index.php');
+   }
+}
+
+function checkExistingAuthor($conn, $email, $author){
+   $sqlSelectAuthor = "SELECT Author FROM author WHERE Name='$author'";
+   $resultAuthor = mysqli_query($conn, $sqlSelectAuthor);
+   if(mysqli_num_rows($resultAuthor) != 0){
+      return true;
+   }
+   return false;
+}
+
+function checkExistingReviewFromUser($conn, $email, $isbn){
+   $sqlSelectReviewsISBN = "SELECT reviews.ISBN FROM usersbooks INNER JOIN reviews ON usersbooks.ReviewID = reviews.ID WHERE reviews.ISBN='$isbn' AND usersbooks.Email='$email'";
+   $resultReviewsISBN = mysqli_query($conn, $sqlSelectReviewsISBN);
+   if(mysqli_num_rows($resultReviewsISBN) != 0){
+      return true;
+   }
+   return false;
+}
+
 //TEST METHOD
-function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating, $picture){
+function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating, $picture, $visible, $badge){
+   if($badge != null){
+      $sqlInsertBadge = "INSERT INTO premium(BadgeURL) VALUES ('$badge')";
+      $resultInsertBadge = mysqli_query($conn, $sqlInsertBadge);
+   }
+
    $releaseDateSQL=date("Y-m-d",strtotime($releaseDate));
    $authorDOBSQL=date("Y-m-d",strtotime($authorDOB));
 
-
-   $sqlInsertAuthor = "INSERT INTO author(Name, DOB) VALUES('$author', '$authorDOBSQL')";
-   mysqli_query($conn, $sqlInsertAuthor);
-
-   $sqlInsertBook = "INSERT INTO books(ISBN, Author, Title, DateReleased, Description, Picture) VALUES('$isbn','$author','$title','$releaseDateSQL','$description','$picture')";
-   mysqli_query($conn, $sqlInsertBook);
-
-   $sqlInsertPages = "INSERT INTO pages(TotalPages, Page) VALUES('$totalPages','$pagesRead')";
-   if (mysqli_query($conn, $sqlInsertPages)){
-      $pageID = mysqli_insert_id($conn);
+   if(!checkExistingAuthor($conn, $email, $author)){
+      $sqlInsertAuthor = "INSERT INTO author(Name, DOB) VALUES('$author', '$authorDOBSQL')";
+      mysqli_query($conn, $sqlInsertAuthor);
    }
 
-   $sqlInsertReview = "INSERT INTO reviews(ISBN,Review,Rating,Visible) VALUES('$isbn','$review','$rating',true)";
-   if (mysqli_query($conn, $sqlInsertReview)) {
-      $reviewID = mysqli_insert_id($conn);
+   if(!checkExistingBook($conn, $email, $isbn)){
+      $sqlInsertBook = "INSERT INTO books(ISBN, Author, Title, DateReleased, Description, Picture) VALUES('$isbn','$author','$title','$releaseDateSQL','$description','$picture')";
+      mysqli_query($conn, $sqlInsertBook);
    }
 
-   $sqlInsertUserBooks = "INSERT INTO usersbooks(ReviewID, Email, PageID) VALUES('$reviewID','$email','$pageID')";
-   mysqli_query($conn, $sqlInsertUserBooks);
+   if(!checkExistingReviewFromUser($conn, $email, $isbn)){
+      $sqlInsertPages = "INSERT INTO pages(TotalPages, Page) VALUES('$totalPages','$pagesRead')";
+      if (mysqli_query($conn, $sqlInsertPages)){
+         $pageID = mysqli_insert_id($conn);
+      }
+   
+      $sqlInsertReview = "INSERT INTO reviews(ISBN,Review,Rating,Visible) VALUES('$isbn','$review','$rating','$visible')";
+      if (mysqli_query($conn, $sqlInsertReview)) {
+         $reviewID = mysqli_insert_id($conn);
+      }
+   
+      $sqlInsertUserBooks = "INSERT INTO usersbooks(ReviewID, Email, PageID) VALUES('$reviewID','$email','$pageID')";
+      mysqli_query($conn, $sqlInsertUserBooks);
+   }else{
+      $_SESSION['errmessage'] = "Book Review already exists!";
+   }
 
    header('Location: /coursework/profile/index.php');
    exit();
@@ -111,7 +192,7 @@ function getAllUserBookReviews($conn, $username){
    $bookDetailsArray = array();
    $pagesDetailsArray = array();
 
-   $sqlSelectUserBooks = "SELECT usersbooks.ID, usersbooks.ReviewID, usersbooks.Email, usersbooks.PageID FROM users INNER JOIN usersbooks
+   $sqlSelectUserBooks = "SELECT usersbooks.ID, usersbooks.ReviewID, usersbooks.Email, usersbooks.PageID, usersbooks.created_at FROM users INNER JOIN usersbooks
                            ON users.Email = usersbooks.Email WHERE users.Username='$username'";
    $resultUserBooks = mysqli_query($conn, $sqlSelectUserBooks);
 
@@ -250,7 +331,7 @@ function getOneUserBookReview($conn, $email, $id){
  * Why it only updates pages and reviews is so that it makes it easier to manage books database and that the only thing that
  * needs to be editted in an existing book is the page count and the review
  */
-function updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating){
+function updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, $visible){
    $sqlSelectUserBooks = "SELECT ReviewID, PageID FROM usersbooks WHERE ID='$id' AND Email='$email'";
 
    $resultUserBooks = mysqli_query($conn, $sqlSelectUserBooks);
@@ -263,7 +344,7 @@ function updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating){
    $sqlUpdatePages = "UPDATE pages SET Page='$pagesRead' WHERE ID='$pageID'";
    mysqli_query($conn, $sqlUpdatePages);
 
-   $sqlUpdateReview = "UPDATE reviews SET Review='$review', Rating='$rating' WHERE ID='$reviewID'";
+   $sqlUpdateReview = "UPDATE reviews SET Review='$review', Rating='$rating', Visible='$visible' WHERE ID='$reviewID'";
    mysqli_query($conn, $sqlUpdateReview);
 
 }
@@ -285,8 +366,75 @@ function checkPagesReadAndTotalPagesEqual($conn, $id, $email){
 
 }
 
-function deleteBooksReview(){
+function checkIfPremiumUser($conn, $email){
+   $sqlSelectPremium = "SELECT Email FROM premium WHERE Email='$email'";
+   $result = mysqli_query($conn, $sqlSelectPremium);
+   if(mysqli_num_rows($result) != 0){
+      return true;
+   }
+   return false;
+}
 
+function checkIfStandardUser($conn, $email){
+   $sqlSelectStandard = "SELECT Email FROM standard WHERE Email='$email'";
+   $result = mysqli_query($conn, $sqlSelectStandard);
+   if(mysqli_num_rows($result) != 0){
+      return true;
+   }
+   return false;
+}
+
+function decrementStandardLimitReviews($conn, $email){
+   $sqlSelectStandard = "SELECT BooksLimit FROM standard WHERE Email='$email'";
+   $resultSelect = mysqli_query($conn, $sqlSelectStandard);
+   $selectArray = mysqli_fetch_array($resultSelect, MYSQLI_ASSOC);
+   $booksLimit = (int) $selectArray['BooksLimit'] - 1;
+   if($booksLimit >= 0){
+      $sqlUpdateStandard = "UPDATE standard SET BooksLimit='$booksLimit' WHERE Email = '$email'";
+      $resultUpdate = mysqli_query($conn, $sqlUpdateStandard);
+   }else{
+      header('Location: /coursework/profile/index.php');
+      $_SESSION['errmessage'] = "Book limit reached";
+      exit();   
+   }
+}
+
+function decrementPrivatePostReviews($conn, $email){
+   $sqlSelectStandard = "SELECT PrivatePosts FROM standard WHERE Email='$email'";
+   $resultSelect = mysqli_query($conn, $sqlSelectStandard);
+   $selectArray = mysqli_fetch_array($resultSelect, MYSQLI_ASSOC);
+   $privatePosts = (int) $selectArray['PrivatePosts'] - 1;
+   if($privatePosts >= 0){
+      $sqlUpdateStandard = "UPDATE standard SET PrivatePosts='$privatePosts' WHERE Email = '$email'";
+      $resultUpdate = mysqli_query($conn, $sqlUpdateStandard);
+   }else{
+      $_SESSION['errmessage'] = "Private posts limit reached";
+      header('Location: /coursework/profile/index.php');
+      exit();   
+   }
+}
+
+function incrementPrivatePostReviews($conn, $email){
+   $sqlSelectStandard = "SELECT PrivatePosts FROM standard WHERE Email='$email'";
+   $resultSelect = mysqli_query($conn, $sqlSelectStandard);
+   $selectArray = mysqli_fetch_array($resultSelect, MYSQLI_ASSOC);
+   $privatePosts = (int) $selectArray['PrivatePosts'] + 1;
+   $sqlUpdateStandard = "UPDATE standard SET PrivatePosts='$privatePosts' WHERE Email = '$email'";
+   $resultUpdate = mysqli_query($conn, $sqlUpdateStandard);
+}
+
+function checkStandardPrivatePosts($conn, $email){
+   $sqlSelectStandard = "SELECT PrivatePosts FROM standard WHERE Email='$email'";
+   $resultSelect = mysqli_query($conn, $sqlSelectStandard);
+   $selectArray = mysqli_fetch_array($resultSelect, MYSQLI_ASSOC);
+   return (int) $selectArray['PrivatePosts'];
+}
+
+function checkStandardBooksLimit($conn, $email){
+   $sqlSelectStandard = "SELECT BooksLimit FROM standard WHERE Email='$email'";
+   $resultSelect = mysqli_query($conn, $sqlSelectStandard);
+   $selectArray = mysqli_fetch_array($resultSelect, MYSQLI_ASSOC);
+   return ((int) $selectArray['BooksLimit'] != 0);
 }
 
 function errorRedirect(){

@@ -15,10 +15,17 @@ global $bookReviewArray;
 global $bookDetailsArray;
 global $pagesDetailsArray;
 
+$premiumButton = false;
+
+if(isset($_POST['premium'])){
+    upgradeToPremium($conn, $_SESSION['User']); 
+}
+
 if(isset($_SESSION['User']) && !isset($_GET['user'])){
     $profileData = getProfileData($conn, $_SESSION['User']);
     $username = getUsernameFromUsersTable($conn, $_SESSION['User']);
     list($userBooksArray, $bookReviewArray, $bookDetailsArray, $pagesDetailsArray) = getAllUserBookReviews($conn, $username);
+    $premiumButton = checkIfStandardUser($conn, $_SESSION['User']);
 }
 
 if(isset($_GET['user'])){
@@ -52,12 +59,21 @@ if(isset($_POST['deleteComment'])){
     $id = $_POST['postIDToDelete'];
     deleteComment($conn, $_SESSION['User'], $id);
 
+
     if(isset($_POST['user'])){
         header('Location: ?user=' . $_POST['user']);
     }else{
         header('Location: index.php');
     }
 
+}
+
+$bookCount = 0;
+
+global $error;
+if(isset($_SESSION['errmessage'])){
+    $error = $_SESSION['errmessage'];
+    unset($_SESSION['errmessage']);
 }
 
 
@@ -72,6 +88,7 @@ if(isset($_POST['deleteComment'])){
 
     <!-- USER NEEDS TO BE LOGGED IN/SESSION NEEDS TO BE ACTIVE IN ORDER TO ACCESS THE DATA-->
     <?php if(isset($_SESSION['User'])){ ?>
+    <h2 class="error"><?php echo $error ?></h2>
     <div class="container">
     <form action="index.php" method="GET">
         <input class="SearchBox" type="text" placeholder="Search for a user" name="user">
@@ -83,20 +100,33 @@ if(isset($_POST['deleteComment'])){
     <hr> 
 
     <h1><?php echo (isset($_GET['user']) ? 'User: ' : 'Welcome ')?> <?php echo $profileData['Username'] ?> </h1>
+    <?php if(checkIfPremiumUser($conn, $_SESSION['User'])) { ?>
+    <img width="50px" height="50px" src="<?php echo ($profileData['BadgeURL'] != null) ? "/coursework/resources/badges/".$profileData['BadgeURL'] : "" ?>" />
+    <?php } ?>
+
     <h2> Bio: <?php echo ($profileData['Bio'] == null) ? ((isset($_GET['user'])) ? 'Nothing to show' : 'No bio added, try adding one') : $profileData['Bio'] ?> </h2>
     <div class="Picture"><img class="ProfilePicture" src="<?php echo (file_exists($profileData['Picture'])) ? $profileData['Picture'] : '/coursework/resources/pixabay-pp.png' ?>"/></div>
 
     <?php } ?>
 
     <h2><?php echo (isset($_GET['user']) && $profileData == null) ? 'User does not exist' : ' ' ?> </h2>
+
+
     <p><?php echo (isset($_GET['user'])) ? '<a class="Button" href="index.php"> Return to my profile </a>' : '<a class="Button" href="edit.php"> Edit profile </a>' ?></p>
+    <?php if($premiumButton && !isset($_GET['user'])){ ?>
+        <form action="index.php" method="post"> 
+        <input type="submit" class="Button" value="Upgrade to premium" />
+        <input type="hidden" name="premium">
+        </form>
+    <?php } ?>
+
 
     <hr>
 
     <h2> Books: </h2>
 
     <!-- IF THE USER IS NOT CURRENTLY ON THEIR OWN PROFILE THEN THE 'Add Book' BUTTON SHOULD BE REMOVED-->
-    <?php echo (!isset($_GET['user'])) ? '<a class="Button" href="../book/add.php"> Add Book </a>' : NULL ?>
+    <?php echo ((!isset($_GET['user']) && checkStandardBooksLimit($conn, $_SESSION['User'])) || checkIfPremiumUser($conn, $_SESSION['User'])) ? '<a class="Button" href="../book/add.php"> Add Book </a>' : NULL ?>
 
     <!-- MAKES SURE BOOK IS AVAILABLE BEFORE LOOPING TO PREVENT NULL ERRORS-->
     <?php if(isset($userBooksArray)){ ?>
@@ -114,6 +144,8 @@ if(isset($_POST['deleteComment'])){
         <p>Author: <?php echo $bookDetailsArray[$i]['Author'] ?></p>
         <p>Date released: <?php echo $bookDetailsArray[$i]['DateReleased'] ?></p>
         <p>Read <?php echo $pagesDetailsArray[$i]['Page'] ?> out of <?php echo $pagesDetailsArray[$i]['TotalPages'] ?> pages in the book</p>
+        <p><?php echo ($bookReviewArray[$i]['Visible']) ? 'Public review' : 'Private review' ?></p>
+        <p>Created at : <?php echo $userBooksArray[$i]['created_at']?></p>
 
         <?php if( (int) $pagesDetailsArray[$i]['Page'] == (int) $pagesDetailsArray[$i]['TotalPages']   ){ ?>
             <p>Review: <?php echo $bookReviewArray[$i]['Review']?></p>
@@ -143,6 +175,7 @@ if(isset($_POST['deleteComment'])){
                 <form action="index.php" method="post">
                     <input class="DeleteComment" type="submit" name="deleteComment" value="Delete Comment">
                     <input type="hidden" name="postIDToDelete" value="<?php echo $commentId[$j] ?>">
+                    <input type="hidden" name="user" value="<?php echo (isset($_GET['user'])) ? $_GET['user'] : NULL ?>">
                 </form>
             <?php } ?>
         <?php } ?>
@@ -152,8 +185,6 @@ if(isset($_POST['deleteComment'])){
 
 
 
-    <?php }else { ?>
-        <h1>No books to show </h1>
     <?php } ?>
     </div>
     <?php   } ?>

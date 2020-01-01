@@ -131,13 +131,7 @@
     overflow: hidden;
     background-color: #546A7B;
   }
-body {
-      padding: 0;
-      margin: 0;
-      background-image: url("./pexels_bgimage.jpg");
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-}
+  
 .nav li {
     float: left;
   }

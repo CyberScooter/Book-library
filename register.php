@@ -4,7 +4,7 @@ session_start();
 include "db_operations.php";
 include "./config/db_connection.php";
 
-if(isset($_POST['submit'])){
+if(isset($_POST['submitStandard'])){
     $email = $_POST['email'];
     $password = $_POST['password'];
     $passConfirmation = $_POST['passwordConfirmation'];
@@ -39,7 +39,7 @@ mysqli_close($conn);
         <input class="TextBox" type="text" name="email" placeholder="Enter email address">
         <input class="TextBox" type="password" name="password" placeholder="Create a password">
         <input class="TextBox" type="password" name="passwordConfirmation" placeholder="Retype password">
-        <input class="Button" type="submit" name="submit" value="Register">
+        <input class="Button" type="submit" name="submitStandard" value="Register">
     </form>
 
     <?php }else{ ?>

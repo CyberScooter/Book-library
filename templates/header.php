@@ -7,6 +7,16 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/coursework/resources/index.css">
     <title>Books list</title>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            background-image: url("<?php echo (isset($_SESSION['bg-image'])) ? $_SESSION['bg-image'] : null ?>");
+            background-color: <?php echo (!isset($_SESSION['bg-image'])) ? '#DCDCDC;' : NULL;?>
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+    </style>
 </head>
 <body>
     

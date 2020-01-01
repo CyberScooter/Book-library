@@ -6,8 +6,11 @@
 
     if(isset($_GET['logout'])){
         unset($_SESSION['User']);
+        unset($_SESSION['bg-image']);
         header('Location: index.php');
     }
+
+
 
     if(isset($_GET['profile'])){
         header('Location: ./profile/index.php');
@@ -21,12 +24,11 @@
 
     global $username;
     if(isset($_SESSION['User'])){
+        if(checkIfPremiumUser($conn, $_SESSION['User']) && !isset($_SESSION['bg-image'])){
+            setBackgroundURL($conn, $_SESSION['User']);
+        }
         $username = getUsernameFromUsersTable($conn, $_SESSION['User']);
     }
-
-
-    
-    
 
 ?>
 

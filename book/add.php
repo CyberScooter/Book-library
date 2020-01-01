@@ -3,7 +3,11 @@
     include "../db_operations.php";
     include "../config/db_connection.php";
 
+
+    $checkPremiumUser = checkIfPremiumUser($conn, $_SESSION['User']);
     $showReviewInputs = false;
+
+    $standardVisiblePosts = checkStandardPrivatePosts($conn, $_SESSION['User']) > 0 ? true : false;
 
     if(isset($_POST['submit'])){
         $email = $_SESSION['User'];
@@ -16,18 +20,27 @@
         $totalPages = $_POST['totalPages'];
         $pagesRead = $_POST['pagesRead'];
         $picture = $_POST['fileinput'];
+        $badge = null;
+        $review = NULL;
+        $rating = 0;
         if(isset($_POST['review'])){
             $review = $_POST['review'];
             $rating = $_POST['rating'];
-        }else {
-            $review = NULL;
-            $rating = 0;
         }
         if($pagesRead == $totalPages){
             $showReviewInputs = true;
         }
+        $visible = $_POST['visibility'] == 'visible' ? true : false;
+        if(isset($_POST['premium'])){
+            $badge = $_POST['badge'];
+        }
         if($pagesRead <= $totalPages && $email != null && $isbn != null && $title != null && $releaseDate && $description != null && $author != null && $authorDOB != null && $totalPages != null && $pagesRead != null){
-            saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating, $picture);
+            //test this method!!
+            if(checkIfStandardUser($conn, $_SESSION['User'])){
+                !$visible ? decrementPrivatePostReviews($conn, $_SESSION['User']) : NULL;
+                decrementStandardLimitReviews($conn, $_SESSION['User']);
+            }
+            saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating, $picture, $visible, $badge);
         }
 
     }
@@ -48,6 +61,10 @@
             <input class="TextBox" type="text" placeholder="Enter author DOB in (yyyy-mm-dd) format" name="authorDOB">
             <input class="TextBox" type="text" placeholder="Enter total pages" name="totalPages">
             <input class="TextBox" type="text" placeholder="Enter pages read" name="pagesRead">
+            <input type="checkbox" name="visibility" value="visible" checked>Visible</input>
+            <?php if($checkPremiumUser){ ?>
+                <input class="TextBox" type="file" name="badge"/>
+            <?php } ?>
             <input class="TextBox" type="file" name="fileinput"/>
             <?php if($showReviewInputs){ ?>
             <input class="TextBox" type="text" placeholder="Enter review" name="review">

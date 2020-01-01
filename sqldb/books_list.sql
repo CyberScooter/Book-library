@@ -60,6 +60,19 @@ CREATE TABLE posts (
   created_at datetime DEFAULT (now())
 );
 
+CREATE TABLE premium (
+  Email varchar(255) NOT NULL,
+  BadgeURL varchar(255),
+  BackgroundURL varchar(255)
+);
+
+CREATE TABLE standard (
+  Email varchar(255) NOT NULL,
+  BooksLimit int NOT NULL,
+  PrivatePosts int NOT NULL
+
+);
+
 ALTER TABLE usersbooks ADD FOREIGN KEY (Email) REFERENCES users (Email);
 
 ALTER TABLE usersbooks ADD FOREIGN KEY (ReviewID) REFERENCES reviews (ID);
@@ -77,3 +90,7 @@ ALTER TABLE posts ADD FOREIGN KEY (CommentID) REFERENCES comments (ID);
 ALTER TABLE posts ADD FOREIGN KEY (ReviewID) REFERENCES reviews (ID);
 
 ALTER TABLE posts ADD FOREIGN KEY (User) REFERENCES users (Email);
+
+ALTER Table premium ADD FOREIGN KEY (Email) REFERENCES users (Email);
+
+ALTER Table standard ADD FOREIGN KEY (Email) REFERENCES users (Email);

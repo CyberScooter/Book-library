@@ -5,6 +5,9 @@ session_start();
 include "../db_operations.php";
 include "../config/db_connection.php";
 
+$standardVisiblePosts = checkStandardPrivatePosts($conn, $_SESSION['User']) > 0 ? true : false;
+
+$checkPremiumUser = checkIfPremiumUser($conn, $_SESSION['User']);
 
 if(isset($_GET['id'])){
     global $bookReviewID;
@@ -20,6 +23,7 @@ if(isset($_POST['submit'])){
     $id = $_POST['id'];
     $pagesRead = $_POST['pagesRead'];
     $totalPages = $_POST['totalPages'];
+    $visible = $_POST['visibility'] == 'visible' ? true : false;
     if((int) $pagesRead <= (int) $totalPages && $pagesRead >= 0){
         if(isset($_POST['review'])){
             $review = $_POST['review'];
@@ -28,7 +32,15 @@ if(isset($_POST['submit'])){
             $review = NULL;
             $rating = 0;
         }
-        $rating > 10 ? header('Location: /coursework/profile/index.php') : $bookReviewData = updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating);
+        if(checkIfStandardUser($conn, $_SESSION['User'])){
+            $previousVisibility = $_POST['previousVisibility'] == 'visible' ? true : false;
+            if(!$visible){
+                decrementPrivatePostReviews($conn, $_SESSION['User']);
+            }else if(!$previousVisibility && $visible){
+                incrementPrivatePostReviews($conn, $_SESSION['User']);
+            }
+        }
+        $rating > 10 ? header('Location: /coursework/profile/index.php') : $bookReviewData = updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, $visible);
     }
     header('Location: /coursework/profile/index.php');
     
@@ -54,6 +66,13 @@ if(isset($_POST['submit'])){
             <input id="FixedTextBox" class="TextBox" type="text" value="<?php echo $bookReviewData['DOB'] ?>" placeholder="Enter author DOB in (yyyy-mm-dd) format" readonly>
             <input id="FixedTextBox" class="TextBox" type="text" value="<?php echo $bookReviewData['TotalPages'] ?>" placeholder="Enter total pages" name="totalPages" readonly>
             <input class="TextBox" type="text" value="<?php echo $bookReviewData['Page'] ?>" placeholder="Enter pages read" name="pagesRead">
+            
+            <input type="checkbox" name="visibility" value="visible" <?php echo ($bookReviewData['Visible']) ? 'checked' : null ?>> Visible </input>
+            <input type="hidden" name="previousVisiblity" value="<?php echo ($bookReviewData['Visible']) ? 'visible' : null ?>" >
+
+            <?php if($checkPremiumUser){ ?>
+                <input class="TextBox" type="file" name="badge"/>
+            <?php } ?>
             <input class="TextBox" type="file" name="fileinput"/>
             <?php if($showReviewInputs){ ?>
             <input class="TextBox" type="text" value="<?php echo $bookReviewData['Review'] ?>" placeholder="Enter review" name="review">
