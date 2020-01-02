@@ -1,5 +1,7 @@
 <?php
 
+//LOGIN/REGISTER USER FUNCTIONS
+
 function registerUser($conn, $email, $password, $passwordConfirmation, $username){
    if($password == $passwordConfirmation){
       //adding multiple record to profile table if email is the same but username is different, FIX!
@@ -33,14 +35,6 @@ function insertStandardUser($conn, $email){
    $result = mysqli_query($conn, $sqlInsertStandard);
 }
 
-function upgradeToPremium($conn, $email){
-   $sqlInsertPremium = "INSERT INTO premium(Email) VALUES('$email')";
-   $resultInsert = mysqli_query($conn, $sqlInsertPremium);
-
-   $sqlDeleteStandard = "DELETE FROM standard WHERE Email='$email'";
-   $resultDelete = mysqli_query($conn , $sqlDeleteStandard);
-}
-
 function loginUser($conn, $email, $password){
    $sqlSelect = "SELECT Hash FROM users WHERE Email='$email'";
    $result = mysqli_query($conn,$sqlSelect);
@@ -54,6 +48,20 @@ function loginUser($conn, $email, $password){
    header('Location: login.php');
    exit();
 }
+
+//-------------------------------------------------------------------------------------------------------------------------------------
+
+//
+
+function upgradeToPremium($conn, $email){
+   $sqlInsertPremium = "INSERT INTO premium(Email) VALUES('$email')";
+   $resultInsert = mysqli_query($conn, $sqlInsertPremium);
+
+   $sqlDeleteStandard = "DELETE FROM standard WHERE Email='$email'";
+   $resultDelete = mysqli_query($conn , $sqlDeleteStandard);
+}
+
+
 
 function getUsernameFromUsersTable($conn, $email){
    $sqlSelect = "SELECT Username FROM users WHERE Email='$email'";
@@ -144,12 +152,7 @@ function checkExistingReviewFromUser($conn, $email, $isbn){
 }
 
 //TEST METHOD
-function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating, $picture, $visible, $badge){
-   if($badge != null){
-      $sqlInsertBadge = "INSERT INTO premium(BadgeURL) VALUES ('$badge')";
-      $resultInsertBadge = mysqli_query($conn, $sqlInsertBadge);
-   }
-
+function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating, $picture, $visible){
    $releaseDateSQL=date("Y-m-d",strtotime($releaseDate));
    $authorDOBSQL=date("Y-m-d",strtotime($authorDOB));
 

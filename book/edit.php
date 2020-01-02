@@ -5,10 +5,6 @@ session_start();
 include "../db_operations.php";
 include "../config/db_connection.php";
 
-$standardVisiblePosts = checkStandardPrivatePosts($conn, $_SESSION['User']) > 0 ? true : false;
-
-$checkPremiumUser = checkIfPremiumUser($conn, $_SESSION['User']);
-
 if(isset($_GET['id'])){
     global $bookReviewID;
     $bookReviewID = $_GET['id'];
@@ -70,9 +66,6 @@ if(isset($_POST['submit'])){
             <input type="checkbox" name="visibility" value="visible" <?php echo ($bookReviewData['Visible']) ? 'checked' : null ?>> Visible </input>
             <input type="hidden" name="previousVisiblity" value="<?php echo ($bookReviewData['Visible']) ? 'visible' : null ?>" >
 
-            <?php if($checkPremiumUser){ ?>
-                <input class="TextBox" type="file" name="badge"/>
-            <?php } ?>
             <input class="TextBox" type="file" name="fileinput"/>
             <?php if($showReviewInputs){ ?>
             <input class="TextBox" type="text" value="<?php echo $bookReviewData['Review'] ?>" placeholder="Enter review" name="review">

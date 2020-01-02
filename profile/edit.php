@@ -33,7 +33,7 @@ if(isset($_SESSION['User'])){
         <input class="TextBox" type="text" placeholder="Enter Web URL of new picture" name="picture" value = "<?php echo $profileData['Picture'] ?>">
         <?php if($premium){ ?>
             <input class="TextBox" type="text" placeholder="Enter Web URL of new background picture" name="bgImage" 
-            value = "<?php echo (isset($_SESSION['bg-image'])) ? $_SESSION['bg-image'] : NULL?>">
+                value = "<?php echo (isset($_SESSION['bg-image'])) ? $_SESSION['bg-image'] : NULL?>">
             Enter Badge file again:
             <input class="TextBox" type="file" name="badge"> 
         <?php } ?>

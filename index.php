@@ -4,17 +4,17 @@
     include "./db_operations.php";
     include "./config/db_connection.php";
 
+    //When the logout button is pressed it will check for it in this php file and delete the session
     if(isset($_GET['logout'])){
         unset($_SESSION['User']);
         unset($_SESSION['bg-image']);
         header('Location: index.php');
     }
 
-
-
-    if(isset($_GET['profile'])){
-        header('Location: ./profile/index.php');
-    }
+    // //
+    // if(isset($_GET['profile'])){
+    //     header('Location: ./profile/index.php');
+    // }
 
     global $error;
     if(isset($_SESSION['errmessage'])){
@@ -22,7 +22,7 @@
         unset($_SESSION['errmessage']);
     }
 
-    global $username;
+    //User session stores the email of the user
     if(isset($_SESSION['User'])){
         if(checkIfPremiumUser($conn, $_SESSION['User']) && !isset($_SESSION['bg-image'])){
             setBackgroundURL($conn, $_SESSION['User']);

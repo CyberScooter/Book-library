@@ -4,7 +4,8 @@
     include "db_operations.php";
     include "./config/db_connection.php";
     
-    if(isset($_POST['submit'])){
+    //if login button is pressed
+    if(isset($_POST['login'])){
         $email = $_POST['email'];
         $password = $_POST['password'];
         if($email != null && $password != null){
@@ -15,14 +16,13 @@
 
     }
 
+    
     global $error;
     if(isset($_SESSION['errmessage'])){
         $error = $_SESSION['errmessage'];
         unset($_SESSION['errmessage']);
     }
-    
 
-    mysqli_close($conn);
 
 ?>
 
@@ -34,7 +34,7 @@
     <form action="login.php" method="POST">
         <input class="TextBox" type="text" name="email" placeholder="Enter email address">
         <input class="TextBox" type="password" name="password" placeholder="Enter password">
-        <input class="Button" type="submit" name="submit" value="Login">
+        <input class="Button" type="submit" name="login" value="Login">
     </form>
 
     <?php }else{ ?>
