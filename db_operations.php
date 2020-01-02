@@ -1,11 +1,11 @@
 <?php
 
-//LOGIN/REGISTER USER FUNCTIONS
+
+//LOGIN/REGISTER USER RELATED OPERATIONS:
 
 function registerUser($conn, $email, $password, $passwordConfirmation, $username){
    if($password == $passwordConfirmation){
-      //adding multiple record to profile table if email is the same but username is different, FIX!
-      //FIXED BUT UNDERSTAND HOW                                                                                                       //checks if email is same but that the profile username for that email is not the same as the one entered (this selects no records as user not found)
+      //FIXED                                                                                                        //checks if email is same but that the profile username for that email is not the same as the one entered (this selects no records as user not found)
       $sqlSelectInnerJoin = "SELECT users.Email, users.Username FROM users INNER JOIN profile ON profile.Username = users.Username WHERE users.Email='$email' AND profile.Username != '$username'";
       $result = mysqli_query($conn, $sqlSelectInnerJoin);
       if(mysqli_num_rows($result) == 0){
@@ -49,71 +49,9 @@ function loginUser($conn, $email, $password){
    exit();
 }
 
-//-------------------------------------------------------------------------------------------------------------------------------------
+//=================================================================================================================================================================
 
-//
-
-function upgradeToPremium($conn, $email){
-   $sqlInsertPremium = "INSERT INTO premium(Email) VALUES('$email')";
-   $resultInsert = mysqli_query($conn, $sqlInsertPremium);
-
-   $sqlDeleteStandard = "DELETE FROM standard WHERE Email='$email'";
-   $resultDelete = mysqli_query($conn , $sqlDeleteStandard);
-}
-
-
-
-function getUsernameFromUsersTable($conn, $email){
-   $sqlSelect = "SELECT Username FROM users WHERE Email='$email'";
-   $result = mysqli_query($conn, $sqlSelect);
-   $userArray = mysqli_fetch_array($result, MYSQLI_ASSOC);
-   return $userArray['Username'];
-}
-
-function updateProfile($conn, $email, $dataArray, $backgroundImageURL, $badgeURL, $premium){
-   if($premium){
-      $sqlUpdatePremium = "UPDATE premium SET BadgeURL='$badgeURL',BackgroundURL='$backgroundImageURL' WHERE Email='$email'";
-      if(mysqli_query($conn, $sqlUpdatePremium)){
-         $_SESSION['bg-image'] = $backgroundImageURL;
-         header('Location: index.php');
-         exit();
-      }
-   }
-   $username = getUsernameFromUsersTable($conn, $email);
-   $bio = $dataArray['Bio'];
-   $picture = $dataArray['Picture'];
-   $sqlUpdateProfile = "UPDATE profile SET Bio='$bio', Picture='$picture' WHERE Username='$username'";
-   if(mysqli_query($conn, $sqlUpdateProfile)){
-      header('Location: index.php');
-      exit();
-   }
-   header('Location: edit.php');
-   exit();
-}
-
-function getProfileData($conn, $email){
-   $badgeData = array();
-   $sqlSelectInnerJoin = "SELECT profile.Username, profile.Bio, profile.Picture FROM profile INNER JOIN users ON profile.Username = users.Username WHERE users.Email='$email'";
-   if(checkIfPremiumUser($conn, $email)){
-      $sqlSelectBadge = "SELECT BadgeURL FROM premium WHERE Email='$email'";
-      $resultBadge = mysqli_query($conn, $sqlSelectBadge);
-      $badgeData = mysqli_fetch_array($resultBadge, MYSQLI_ASSOC);
-   }
-   $resultInnerJoin = mysqli_query($conn, $sqlSelectInnerJoin);
-   $profileData = mysqli_fetch_array($resultInnerJoin, MYSQLI_ASSOC);
-   
-   return array_merge($badgeData, $profileData);   
-   
-
-
-
-}
-
-function searchUser($conn, $username){
-   $sqlSelectProfile = "SELECT Username,Bio,Picture FROM profile WHERE Username='$username'";
-   $result = mysqli_query($conn, $sqlSelectProfile);
-   return mysqli_fetch_array($result, MYSQLI_ASSOC);
-}
+//BOOK/BOOK REVIEWS RELATED OPERATIONS:
 
 function checkExistingBook($conn, $email, $isbn){
    $sqlSelectBook = "SELECT ISBN FROM books WHERE ISBN='$isbn'";
@@ -122,15 +60,6 @@ function checkExistingBook($conn, $email, $isbn){
       return true;
    }
    return false;
-}
-
-function setBackgroundURL($conn, $email){
-   $sqlSelectBackground = "SELECT BackgroundURL FROM premium WHERE Email='$email'";
-   if($result = mysqli_query($conn, $sqlSelectBackground)){
-      $backgroundArray = mysqli_fetch_array($result, MYSQLI_ASSOC);
-      $_SESSION['bg-image'] = $backgroundArray['BackgroundURL'];
-      header('Location: /coursework/index.php');
-   }
 }
 
 function checkExistingAuthor($conn, $email, $author){
@@ -151,7 +80,22 @@ function checkExistingReviewFromUser($conn, $email, $isbn){
    return false;
 }
 
-//TEST METHOD
+function checkPagesReadAndTotalPagesEqual($conn, $id, $email){
+   $sqlSelectUserBooks = "SELECT PageID FROM usersbooks WHERE ID='$id' AND Email='$email'";
+
+   $resultUserBooks = mysqli_query($conn, $sqlSelectUserBooks);
+   $usersBooksArray = mysqli_fetch_array($resultUserBooks, MYSQLI_ASSOC);
+
+   $pageID = $usersBooksArray['PageID'];
+
+   $sqlSelectPages = "SELECT Page, TotalPages FROM pages WHERE ID='$pageID'";
+   $resultPages = mysqli_query($conn, $sqlSelectPages);
+   $pagesArray = mysqli_fetch_array($resultPages, MYSQLI_ASSOC);
+
+   return (int) $pagesArray['Page'] == (int) $pagesArray['TotalPages'];
+
+}
+
 function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating, $picture, $visible){
    $releaseDateSQL=date("Y-m-d",strtotime($releaseDate));
    $authorDOBSQL=date("Y-m-d",strtotime($authorDOB));
@@ -180,7 +124,7 @@ function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description
       $sqlInsertUserBooks = "INSERT INTO usersbooks(ReviewID, Email, PageID) VALUES('$reviewID','$email','$pageID')";
       mysqli_query($conn, $sqlInsertUserBooks);
    }else{
-      $_SESSION['errmessage'] = "Book Review already exists!";
+      $_SESSION['errmessage'] = "Book already exists!";
    }
 
    header('Location: /coursework/profile/index.php');
@@ -188,7 +132,6 @@ function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description
    
 }
 
-//TEST METHOD
 function getAllUserBookReviews($conn, $username){
    $userBooksArray = array();
    $bookReviewArray = array();
@@ -245,60 +188,6 @@ function getAllUserBookReviews($conn, $username){
    return array($userBooksArray, $bookReviewArray, $bookDetailsArray, $pagesDetailsArray);
 }
 
-function selectCommentsFromReview($conn, $reviewID){
-   $user = array();
-   $comments = array();
-   $dateCreated = array();
-   $commentIDs = array();
-
-   $sqlSelectCommentID = "SELECT User, CommentID, created_at FROM posts WHERE ReviewID='$reviewID'";
-   $resultCommentID = mysqli_query($conn, $sqlSelectCommentID);
-
-   while($row = mysqli_fetch_assoc($resultCommentID)){
-      $username = getUsernameFromUsersTable($conn, $row['User']);
-      $commentID = $row['CommentID'];
-      $created_at = $row['created_at'];
-      $sqlSelectComment = "SELECT Comment FROM comments WHERE ID='$commentID'";
-      $resultComment = mysqli_query($conn, $sqlSelectComment);
-      while($row = mysqli_fetch_assoc($resultComment)){
-         array_push($comments, $row['Comment']);
-         array_push($dateCreated, $created_at);
-         array_push($user, $username);
-         array_push($commentIDs, $commentID);
-      }
-
-   }
-
-   return array($comments, $dateCreated, $user, $commentIDs);
-}
-
-function insertNewComment($conn, $email, $reviewID, $comment){
-   $sqlInsertComment = "INSERT INTO comments(Comment) VALUES('$comment')";
-   if(mysqli_query($conn, $sqlInsertComment)){
-      $id = mysqli_insert_id($conn);
-   }
-
-   $sqlInsertToPosts = "INSERT INTO posts(User, CommentID, ReviewID) VALUES('$email','$id','$reviewID')";
-   $result = mysqli_query($conn, $sqlInsertToPosts);
-}
-
-function deleteComment($conn, $email, $commentID){
-   $sqlDeleteComment =  "DELETE FROM comments WHERE ID='$commentID'";
-   $resultDeleteComment = mysqli_query($conn, $sqlDeleteComment);
-
-   // Getting primary key directly from posts table of a specific comment so that It can be deleted directly which in result deletes the whole record
-   $sqlSelectPostsID = "SELECT ID FROM posts WHERE CommentID='$commentID'";
-   $resultSelectPostsID = mysqli_query($conn, $sqlSelectPostsID);
-   $postsIDArray = mysqli_fetch_array($resultSelectPostsID, MYSQLI_ASSOC);
-   $postID = $postsIDArray['ID'];
-
-   $sqlDeletePostID = "DELETE FROM posts WHERE ID='$postID'";
-   $resultDeletePostID = mysqli_query($conn, $sqlDeletePostID);
-
-}
-
-
-//check why this is not working
 function getOneUserBookReview($conn, $email, $id){
    //Email in sql statement that comes from the user session to makes sure no other user can edit the post without them being in the same session
    $sqlSelectUserBooks = "SELECT ReviewID, PageID FROM usersbooks WHERE ID='$id' AND Email='$email'";
@@ -352,21 +241,167 @@ function updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, 
 
 }
 
-//change maybe so no return
-function checkPagesReadAndTotalPagesEqual($conn, $id, $email){
-   $sqlSelectUserBooks = "SELECT PageID FROM usersbooks WHERE ID='$id' AND Email='$email'";
+function deleteUserBookReview($conn, $email, $id, $isbn, $author){
+   $sqlSelectISBNReviews = "SELECT * FROM reviews WHERE ISBN = '$isvn'";
+   if($result = mysqli_query($conn, $sqlSelectISBNReviews)){
 
-   $resultUserBooks = mysqli_query($conn, $sqlSelectUserBooks);
-   $usersBooksArray = mysqli_fetch_array($resultUserBooks, MYSQLI_ASSOC);
+         $sqlDeleteReview = "DELETE FROM reviews WHERE ID = '$id'";
 
-   $pageID = $usersBooksArray['PageID'];
+         $sqlSelectInnerJoin = "SELECT usersbooks.ID, posts.ID, posts.CommentID FROM usersbooks INNER JOIN reviews ON usersbooks.ReviewID = reviews.ID INNER JOIN posts ON reviews.ID = posts.ReviewID WHERE reviews.ID='$id'";
 
-   $sqlSelectPages = "SELECT Page, TotalPages FROM pages WHERE ID='$pageID'";
-   $resultPages = mysqli_query($conn, $sqlSelectPages);
-   $pagesArray = mysqli_fetch_array($resultPages, MYSQLI_ASSOC);
 
-   return (int) $pagesArray['Page'] == (int) $pagesArray['TotalPages'];
+         if($resultSelectInnerJoin = mysqli_query($conn, $sqlSelectInnerJoin)){
+            $innerJoinArray = mysqli_fetch_array($resultSelectUserBookID, MYSQLI_ASSOC);
+            //check if this below works 
+            $userbooksID = $innerJoinArray['usersbooks.ID'];
+            $postsID = $innerJoinArray['posts.ID'];
+            $commentID = $innerJoinArray['CommentID'];
 
+            $sqlDeleteUserBookID = "DELETE FROM usersbooks WHERE ID='$userBookID'";
+            mysqli_query($conn, $sqlDeleteUserBookID);
+
+            $sqlDeleteCommentID = "DELETE FROM comments WHERE ID='$commentID'";
+            mysqli_query($conn, $sqlDeleteCommentID);
+
+            $sqlDeletePostsID = "DELETE FROM posts WHERE ID='$postsID'";
+            mysqli_query($conn, $sqlDeletePostsID);
+         }
+
+      if(mysqli_num_rows($result) == 1){
+
+         $sqlSelectAuthors = "SELECT * FROM books WHERE Author='$author'";
+         if($resultAuthor = mysqli_query($conn, $sqlSelectAuthor)){
+            if(mysqli_num_rows($resultAuthor) > 1){
+               $sqlDeleteBook = "DELETE FROM books WHERE ISBN='$isbn'";
+               mysqli_query($conn, $sqlDeleteBook);
+            }
+            $sqlDeleteBook = "DELETE FROM books WHERE ISBN='$isbn'";
+            mysqli_query($conn, $sqlDeleteBook);
+            $sqlDeleteAuthor = "DELETE FROM author WHERE Name='$author'";
+            mysqli_query($conn, $sqlDeleteAuthor);
+         }
+
+      }
+   }
+
+}
+
+//=================================================================================================================================================================
+//BOOK COMMENTS OPERATIONS:
+
+function selectCommentsFromReview($conn, $reviewID){
+   $user = array();
+   $comments = array();
+   $dateCreated = array();
+   $commentIDs = array();
+
+   $sqlSelectCommentID = "SELECT User, CommentID, created_at FROM posts WHERE ReviewID='$reviewID'";
+   $resultCommentID = mysqli_query($conn, $sqlSelectCommentID);
+
+   while($row = mysqli_fetch_assoc($resultCommentID)){
+      $username = getUsernameFromUsersTable($conn, $row['User']);
+      $commentID = $row['CommentID'];
+      $created_at = $row['created_at'];
+      $sqlSelectComment = "SELECT Comment FROM comments WHERE ID='$commentID'";
+      $resultComment = mysqli_query($conn, $sqlSelectComment);
+      while($row = mysqli_fetch_assoc($resultComment)){
+         array_push($comments, $row['Comment']);
+         array_push($dateCreated, $created_at);
+         array_push($user, $username);
+         array_push($commentIDs, $commentID);
+      }
+
+   }
+
+   return array($comments, $dateCreated, $user, $commentIDs);
+}
+
+function insertNewComment($conn, $email, $reviewID, $comment){
+   $sqlInsertComment = "INSERT INTO comments(Comment) VALUES('$comment')";
+   if(mysqli_query($conn, $sqlInsertComment)){
+      $id = mysqli_insert_id($conn);
+   }
+
+   $sqlInsertToPosts = "INSERT INTO posts(User, CommentID, ReviewID) VALUES('$email','$id','$reviewID')";
+   $result = mysqli_query($conn, $sqlInsertToPosts);
+}
+
+function deleteComment($conn, $email, $commentID){
+   $sqlDeleteComment =  "DELETE FROM comments WHERE ID='$commentID'";
+   $resultDeleteComment = mysqli_query($conn, $sqlDeleteComment);
+
+   // Getting primary key directly from posts table of a specific comment so that It can be deleted directly which in result deletes the whole record
+   $sqlSelectPostsID = "SELECT ID FROM posts WHERE CommentID='$commentID'";
+   $resultSelectPostsID = mysqli_query($conn, $sqlSelectPostsID);
+   $postsIDArray = mysqli_fetch_array($resultSelectPostsID, MYSQLI_ASSOC);
+   $postID = $postsIDArray['ID'];
+
+   $sqlDeletePostID = "DELETE FROM posts WHERE ID='$postID'";
+   $resultDeletePostID = mysqli_query($conn, $sqlDeletePostID);
+
+}
+
+//=================================================================================================================================================================
+//USER OPERATIONS
+
+function getUsernameFromUsersTable($conn, $email){
+   $sqlSelect = "SELECT Username FROM users WHERE Email='$email'";
+   $result = mysqli_query($conn, $sqlSelect);
+   $userArray = mysqli_fetch_array($result, MYSQLI_ASSOC);
+   return $userArray['Username'];
+}
+
+function updateProfile($conn, $email, $dataArray, $backgroundImageURL, $badgeURL, $premium){
+   if($premium){
+      $sqlUpdatePremium = "UPDATE premium SET BadgeURL='$badgeURL',BackgroundURL='$backgroundImageURL' WHERE Email='$email'";
+      if(mysqli_query($conn, $sqlUpdatePremium)){
+         $_SESSION['bg-image'] = $backgroundImageURL;
+         header('Location: index.php');
+         exit();
+      }
+   }
+   $username = getUsernameFromUsersTable($conn, $email);
+   $bio = $dataArray['Bio'];
+   $picture = $dataArray['Picture'];
+   $sqlUpdateProfile = "UPDATE profile SET Bio='$bio', Picture='$picture' WHERE Username='$username'";
+   if(mysqli_query($conn, $sqlUpdateProfile)){
+      header('Location: index.php');
+      exit();
+   }
+   header('Location: edit.php');
+   exit();
+}
+
+function getProfileData($conn, $email){
+   $badgeData = array();
+   $sqlSelectInnerJoin = "SELECT profile.Username, profile.Bio, profile.Picture FROM profile INNER JOIN users ON profile.Username = users.Username WHERE users.Email='$email'";
+   if(checkIfPremiumUser($conn, $email)){
+      $sqlSelectBadge = "SELECT BadgeURL FROM premium WHERE Email='$email'";
+      $resultBadge = mysqli_query($conn, $sqlSelectBadge);
+      $badgeData = mysqli_fetch_array($resultBadge, MYSQLI_ASSOC);
+   }
+   $resultInnerJoin = mysqli_query($conn, $sqlSelectInnerJoin);
+   $profileData = mysqli_fetch_array($resultInnerJoin, MYSQLI_ASSOC);
+   
+   return array_merge($badgeData, $profileData);   
+
+}
+
+function searchUser($conn, $username){
+   $sqlSelectProfile = "SELECT Username,Bio,Picture FROM profile WHERE Username='$username'";
+   $result = mysqli_query($conn, $sqlSelectProfile);
+   return mysqli_fetch_array($result, MYSQLI_ASSOC);
+}
+
+//=================================================================================================================================================================
+//PREMIUM USER OPERATIONS:
+
+function upgradeToPremium($conn, $email){
+   $sqlInsertPremium = "INSERT INTO premium(Email) VALUES('$email')";
+   $resultInsert = mysqli_query($conn, $sqlInsertPremium);
+
+   $sqlDeleteStandard = "DELETE FROM standard WHERE Email='$email'";
+   $resultDelete = mysqli_query($conn , $sqlDeleteStandard);
 }
 
 function checkIfPremiumUser($conn, $email){
@@ -377,6 +412,18 @@ function checkIfPremiumUser($conn, $email){
    }
    return false;
 }
+
+function setBackgroundURL($conn, $email){
+   $sqlSelectBackground = "SELECT BackgroundURL FROM premium WHERE Email='$email'";
+   if($result = mysqli_query($conn, $sqlSelectBackground)){
+      $backgroundArray = mysqli_fetch_array($result, MYSQLI_ASSOC);
+      $_SESSION['bg-image'] = $backgroundArray['BackgroundURL'];
+      header('Location: /coursework/index.php');
+   }
+}
+
+//=================================================================================================================================================================
+//STANDARD USER OPERATIONS
 
 function checkIfStandardUser($conn, $email){
    $sqlSelectStandard = "SELECT Email FROM standard WHERE Email='$email'";
@@ -439,6 +486,9 @@ function checkStandardBooksLimit($conn, $email){
    $selectArray = mysqli_fetch_array($resultSelect, MYSQLI_ASSOC);
    return ((int) $selectArray['BooksLimit'] != 0);
 }
+
+//=================================================================================================================================================================
+//ERROR HANDLING
 
 function errorRedirect(){
    $_SESSION['errmessage'] = 'Error description: ' . mysqli_error($conn);

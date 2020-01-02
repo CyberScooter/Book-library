@@ -46,6 +46,9 @@ if(isset($_GET['user'])){
 //     $editProfile = true;
 // }
 
+//delete book
+
+
 //Comment operations
 
 if(isset($_POST['addComment'])){
@@ -176,6 +179,11 @@ if(isset($_SESSION['errmessage'])){
 
         <?php if(!isset($_GET['user'])){ ?>
             <a class="Button" href="/coursework/book/edit.php?id=<?php echo $userBooksArray[$i]['ID'] ?>"> Update Book details</a>
+            <form action="index.php" method="post">
+                    <input class="Button" type="submit" name="deleteBook" value="Delete Book">
+                    <input type="hidden" name="deleteISBN" value="<?php echo $bookReviewArray[$i]['ISBN'] ?>">
+                    <input type="hidden" name="deleteReviewID" value="<?php echo $userBooksArray[$i]['ReviewID'] ?>">
+            </form>
         <?php } ?>
 
         <!-- COMMENTS SECTION -->
