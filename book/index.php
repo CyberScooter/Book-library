@@ -11,32 +11,28 @@ global $commentsDateCreated;
 
 global $booksData;
 
-//If user is on another person's profile:
-if(isset($_GET['user'])){
-    $profileData = searchUser($conn, $_GET['user']);
-    $username = $_GET['user'];
+//Allows use to upgrade to premium if they're already not a premium user
+$premiumButton = false;
+
+if(isset($_POST['premium'])){
+    upgradeToPremium($conn, $_SESSION['User']); 
+}
+
+//If user is on their own profile:
+if(isset($_SESSION['User'])){
+    $profileData = getProfileData($conn, $_SESSION['User']);
+    $username = getUsernameFromUsersTable($conn, $_SESSION['User']);
     $booksData = getAllUserBookReviews($conn, $username);
+    $premiumButton = checkIfStandardUser($conn, $_SESSION['User']);
 }
 
-//User on their own profile
-if(!isset($_GET['user']) && isset($_SESSION['User']) ){
-    $username = getUsernameFromUsersTable($conn, $_SESSION['User']);    
-    $profileData = searchUser($conn, $username);
+if(isset($_POST['deleteBook'])){
+    $deleteISBN = $_POST['deleteISBN'];
+    $deleteReviewID = $_POST['deleteReviewID'];
+    $deleteAuthor = $_POST['deleteAuthor'];
+    deleteUserBookReview($conn, $_SESSION['User'], $deleteReviewID, $deleteISBN, $deleteAuthor);
+    header('Location: index.php');
 }
-
-//
-//TO DELETE MAYBE:
-
-// global $editProfile;
-// $editProfile = false;
-// if(isset($_POST['edit'])){
-//     $editProfile = true;
-// }
-
-//delete book
-
-
-//Comment operations
 
 if(isset($_POST['addComment'])){
     $id = $_POST['id'];
@@ -68,7 +64,6 @@ if(isset($_POST['deleteComment'])){
     }
 
 }
-
 //Error handling
 global $error;
 if(isset($_SESSION['errmessage'])){
@@ -76,54 +71,16 @@ if(isset($_SESSION['errmessage'])){
     unset($_SESSION['errmessage']);
 }
 
-?>
 
+?>
 
 <?php include '../templates/header.php'; ?>
 
+<?php if(isset($_SESSION['User'])){ ?>
+    <?php echo (checkStandardBooksLimit($conn, $_SESSION['User']) || checkIfPremiumUser($conn, $_SESSION['User'])) ? '<a class="AddButton" href="../book/add.php"> Add Book </a>' : NULL ?>
+<?php if($booksData != null){ ?>
 
-    <!-- User session needs to be set in order to access profile-->
-    <?php if(isset($_SESSION['User'])){ ?>
-
-        <h2 class="error"><?php echo $error ?></h2>
-
-        <div class="container">
-
-        <form action="index.php" method="GET">
-            <input class="SearchBox" type="text" placeholder="Search for a user" name="user">
-            <input class="Search" type="submit" value="Search"> 
-        </form>
-
-        <?php if($profileData != null) { ?>
-
-        <!-- Displays specific data based on whether the user is on their own profile or someone elses -->
-        <hr> 
-        <h1><?php echo (isset($_GET['user']) ? 'User: ' : 'Welcome ')?> <?php echo $profileData['Username'] ?> </h1>
-        <?php if(checkIfPremiumUser($conn, $_SESSION['User'])) { ?>
-            <img width="50px" height="50px" src="<?php echo ($profileData['BadgeURL'] != null) ? "/coursework/resources/badges/".$profileData['BadgeURL'] : "" ?>" />
-        <?php } ?>
-
-        <h2> Bio: <?php echo ($profileData['Bio'] == null) ? ((isset($_GET['user'])) ? 'Nothing to show' : 'No bio added, try adding one') : $profileData['Bio'] ?> </h2>
-        <div class="Picture"><img class="ProfilePicture" src="<?php echo (file_exists($profileData['Picture'])) ? $profileData['Picture'] : '/coursework/resources/pixabay-pp.png' ?>"/></div>
-
-    <?php } ?>
-
-    <h2><?php echo (isset($_GET['user']) && $profileData == null) ? 'User does not exist' : ' ' ?> </h2>
-
-
-    <p><?php echo (isset($_GET['user'])) ? '<a class="Button" href="index.php"> Return to my profile </a>' : '<a class="Button" href="edit.php"> Edit profile </a>' ?></p>
-
-    <!-- BOOKS SECTION -->
-
-
-
-    <!-- Makes sure there is data set for books so that it doesnt loop through nothing and cause an error-->
-    <?php if(isset($booksData)){ ?>
-        <hr>
-        <h2 style="font-size:2rem"> Books: </h2>
-
-    <!-- This loops through each review made by a user and the index of each one is referenced by the index location '$i' -->
-    <?php   foreach($booksData as $i => $item){ ?>
+<?php   foreach($booksData as $i => $item){ ?>
     
     <!-- CSS properties used to make it easier to visualise and see the data on the web page  -->
     <div class="BookReview">
@@ -134,8 +91,6 @@ if(isset($_SESSION['errmessage'])){
     <!-- The second part of the if statement makes sure that the book is visible and the user is on their own profile -->
     <!-- The third part of the if statement makes sure that the if the book is on private and the user is on their own profile then the book should be seen as it is their own -->
 
-    <?php if(($booksData[$i]['Visible'] && isset($_GET['user'])) || ($booksData[$i]['Visible'] && !isset($_GET['user'])) || (!$booksData[$i]['Visible'] && !isset($_GET['user']))  ){ ?>
-        
         <p><span>ISBN:</span> <?php echo $booksData[$i]['ISBN'] ?></p>
         <p><span>Title:</span> <?php echo $booksData[$i]['Title'] ?></p>
         <p> <img src="/coursework/resources/books/<?php echo $booksData[$i]['Picture'] ?>" /></p>
@@ -143,6 +98,7 @@ if(isset($_SESSION['errmessage'])){
         <p><span>Author:</span> <?php echo $booksData[$i]['Author'] ?></p>
         <p><span>Date released:</span> <?php echo $booksData[$i]['DateReleased'] ?></p>
         <p><span>Read</span> <?php echo $booksData[$i]['Page'] ?> out of <?php echo $booksData[$i]['TotalPages'] ?> pages in the book</p>
+        <p <?php echo ($booksData[$i]['Visible']) ? 'class="Green"' : 'class="Red"' ?>><?php echo ($booksData[$i]['Visible']) ? 'Public review' : 'Private review' ?></p>
         <p><span>Created at :</span> <?php echo $booksData[$i]['created_at']?></p>
 
         <?php if( (int) $booksData[$i]['Page'] == (int) $booksData[$i]['TotalPages']   ){ ?>
@@ -173,7 +129,7 @@ if(isset($_SESSION['errmessage'])){
             <input type="hidden" name="user" value="<?php echo (isset($_GET['user'])) ? $_GET['user'] : NULL ?>">
         </form>
 
-        <p id="<?php echo $booksData[$i]['ReviewID'] ?>"> <span>Comments:</span> </p>
+        <p id="<?php echo $booksData[$i]['ReviewID'] ?>"> <span> Comments: </span></p>
 
         <!--
             An appropriate function from the db_operations.php file is called that selects all the required commenting data for the review
@@ -194,14 +150,18 @@ if(isset($_SESSION['errmessage'])){
 
         <hr>
 
-    <?php } ?>
-
     </div>
     <?php } ?>
-    <?php } ?>
 
-    <?php }else { ?>
-        <h1> Login/register required </h1>
-    <?php } ?>
+<?php }else { ?>
+
+    <h1> No books found, try adding one </h1>
+<?php }?>
+            <?php } else { ?>
+                <h1> Login/register required </h1>
+            <?php } ?>
+
+
+
 
 <?php include '../templates/footer.php'; ?>

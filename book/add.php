@@ -35,6 +35,8 @@
                 decrementStandardLimitReviews($conn, $_SESSION['User']);
             }
             saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating, $picture, $visible);
+            header('Location: /coursework/book/index.php');
+            exit();
         }
 
     }

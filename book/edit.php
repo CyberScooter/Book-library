@@ -36,9 +36,9 @@ if(isset($_POST['submit'])){
                 incrementPrivatePostReviews($conn, $_SESSION['User']);
             }
         }
-        $rating > 10 ? header('Location: /coursework/profile/index.php') : $bookReviewData = updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, $visible);
+        $rating > 10 ? header('Location: /coursework/book/index.php') : $bookReviewData = updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, $visible);
     }
-    header('Location: /coursework/profile/index.php');
+    header('Location: /coursework/book/index.php');
     
 }
 

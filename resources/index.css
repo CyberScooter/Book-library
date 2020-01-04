@@ -19,6 +19,14 @@
     transition: 0.3s;
 }
 
+.Green {
+  color: green;
+}
+
+.Red {
+  color: red;
+}
+
 .Picture {
   width: 100px;
   margin: auto;
@@ -27,6 +35,8 @@
 .User {
   font-weight: bold;
 }
+
+
 
 
 .ProfilePicture {
@@ -40,7 +50,12 @@
 }
 
 .BookReview p{
-  font-size: 2rem;
+  font-size: 1.8rem;
+}
+
+.BookReview span {
+  font-weight: bold;
+  color: 	black;
 }
 
 .container {
@@ -64,6 +79,24 @@
 
 
 }
+
+.AddButton{
+  display: block;
+  margin: 30px auto !important;
+  width: 80%;
+  padding: 10px;
+  font-size: 2rem;
+  background-color: #D2D5DB;
+  margin: 5px;
+  border: 1px solid #455765;
+  color: black;
+  text-decoration: none;
+  opacity: 1;
+  cursor: pointer;
+  border: 1px solid #455765;
+  box-shadow: 1px 1px 4px;
+}
+
 
 .DeleteComment {
   display:flex;

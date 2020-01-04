@@ -126,66 +126,60 @@ function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description
    }else{
       $_SESSION['errmessage'] = "Book already exists!";
    }
-
-   header('Location: /coursework/profile/index.php');
-   exit();
    
 }
 
 function getAllUserBookReviews($conn, $username){
-   $userBooksArray = array();
-   $bookReviewArray = array();
-   $bookDetailsArray = array();
-   $pagesDetailsArray = array();
+   $booksData = array();
 
    $sqlSelectUserBooks = "SELECT usersbooks.ID, usersbooks.ReviewID, usersbooks.Email, usersbooks.PageID, usersbooks.created_at FROM users INNER JOIN usersbooks
                            ON users.Email = usersbooks.Email WHERE users.Username='$username'";
    $resultUserBooks = mysqli_query($conn, $sqlSelectUserBooks);
 
    while($row = mysqli_fetch_assoc($resultUserBooks)) {
-      $userBooksArray[] = $row;
+      $booksData[] = $row;
    }
 
    //try for default for loop with index number if this loop doesnt work
-   foreach($userBooksArray as $i => $item){
-      $reviewID = $userBooksArray[$i]['ReviewID'];
-      $pageID = $userBooksArray[$i]['PageID'];
+   foreach($booksData as $i => $item){
+      $reviewID = $booksData[$i]['ReviewID'];
+      $pageID = $booksData[$i]['PageID'];
       $sqlSelectBookReview = "SELECT ISBN, Review, Rating, Visible FROM reviews WHERE ID='$reviewID'";
       $resultBookReview = mysqli_query($conn, $sqlSelectBookReview);
 
       //should only be one row per review id so this only goes through once
       //used to map the data booksReviewArray
       while($row = mysqli_fetch_assoc($resultBookReview)) {
-         $bookReviewArray[$i]['ISBN'] = $row['ISBN'];
-         $bookReviewArray[$i]['Review'] = $row['Review'];
-         $bookReviewArray[$i]['Rating'] = $row['Rating'];
-         $bookReviewArray[$i]['Visible'] = $row['Visible'];
+         $booksData[$i]['ISBN'] = $row['ISBN'];
+         $booksData[$i]['Review'] = $row['Review'];
+         $booksData[$i]['Rating'] = $row['Rating'];
+         $booksData[$i]['Visible'] = $row['Visible'];
       }
 
-      $isbn = $bookReviewArray[$i]['ISBN'];
+      $isbn = $booksData[$i]['ISBN'];
       $sqlSelectBookDetails = "SELECT Author, Title, DateReleased, Description, Picture FROM books WHERE ISBN='$isbn'";
       $resultBookDetails = mysqli_query($conn, $sqlSelectBookDetails);
 
       //should only be one row per review id so this only goes through once
       while($row = mysqli_fetch_assoc($resultBookDetails)) {
-         $bookDetailsArray[$i]['Author'] = $row['Author'];
-         $bookDetailsArray[$i]['Title'] = $row['Title'];
-         $bookDetailsArray[$i]['DateReleased'] = $row['DateReleased'];
-         $bookDetailsArray[$i]['Description'] = $row['Description'];
-         $bookDetailsArray[$i]['Picture'] = $row['Picture'];
+         $booksData[$i]['Author'] = $row['Author'];
+         $booksData[$i]['Title'] = $row['Title'];
+         $booksData[$i]['DateReleased'] = $row['DateReleased'];
+         $booksData[$i]['Description'] = $row['Description'];
+         $booksData[$i]['Picture'] = $row['Picture'];
       }
 
       $sqlSelectPageDetails = "SELECT Page, TotalPages FROM pages WHERE ID='$pageID'";
       $resultPagesDetails = mysqli_query($conn, $sqlSelectPageDetails);
 
       while($row = mysqli_fetch_assoc($resultPagesDetails)){
-         $pagesDetailsArray[$i]['Page'] = $row['Page'];
-         $pagesDetailsArray[$i]['TotalPages'] = $row['TotalPages'];
+         $booksData[$i]['Page'] = $row['Page'];
+         $booksData[$i]['TotalPages'] = $row['TotalPages'];
       }
 
    }
 
-   return array($userBooksArray, $bookReviewArray, $bookDetailsArray, $pagesDetailsArray);
+   return $booksData;
 }
 
 function getOneUserBookReview($conn, $email, $id){
@@ -296,6 +290,15 @@ function deleteUserBookReview($conn, $email, $id, $isbn, $author){
          }
 
       }
+
+      $reviewArray = mysqli_fetch_array($result, MYSQLI_ASSOC);
+      if(checkIfStandardUser($conn, $email) && !$reviewArray['visible']){
+         incrementPrivatePostReviews($conn, $email);
+      }
+
+      if(checkIfStandardUser($conn, $email)){
+         incrementStandardLimitReviews($conn, $email);
+      }
    }
 
 }
@@ -341,9 +344,6 @@ function insertNewComment($conn, $email, $reviewID, $comment){
 }
 
 function deleteComment($conn, $email, $commentID){
-   $sqlDeleteComment =  "DELETE FROM comments WHERE ID='$commentID'";
-   $resultDeleteComment = mysqli_query($conn, $sqlDeleteComment);
-
    // Getting primary key directly from posts table of a specific comment so that It can be deleted directly which in result deletes the whole record
    $sqlSelectPostsID = "SELECT ID FROM posts WHERE CommentID='$commentID'";
    $resultSelectPostsID = mysqli_query($conn, $sqlSelectPostsID);
@@ -352,6 +352,10 @@ function deleteComment($conn, $email, $commentID){
 
    $sqlDeletePostID = "DELETE FROM posts WHERE ID='$postID'";
    $resultDeletePostID = mysqli_query($conn, $sqlDeletePostID);
+
+   //deleting comment from comments table
+   $sqlDeleteComment =  "DELETE FROM comments WHERE ID='$commentID'";
+   $resultDeleteComment = mysqli_query($conn, $sqlDeleteComment);
 
 }
 
@@ -445,6 +449,21 @@ function checkIfStandardUser($conn, $email){
       return true;
    }
    return false;
+}
+
+function incrementStandardLimitReviews($conn, $email){
+   $sqlSelectStandard = "SELECT BooksLimit FROM standard WHERE Email='$email'";
+   $resultSelect = mysqli_query($conn, $sqlSelectStandard);
+   $selectArray = mysqli_fetch_array($resultSelect, MYSQLI_ASSOC);
+   $booksLimit = (int) $selectArray['BooksLimit'] + 1;
+   if($booksLimit <= 5){
+      $sqlUpdateStandard = "UPDATE standard SET BooksLimit='$booksLimit' WHERE Email = '$email'";
+      $resultUpdate = mysqli_query($conn, $sqlUpdateStandard);
+   }else{
+      header('Location: /coursework/profile/index.php');
+      $_SESSION['errmessage'] = "Book limit reached";
+      exit();   
+   }
 }
 
 function decrementStandardLimitReviews($conn, $email){
