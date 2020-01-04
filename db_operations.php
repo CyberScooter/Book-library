@@ -242,35 +242,49 @@ function updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, 
 }
 
 function deleteUserBookReview($conn, $email, $id, $isbn, $author){
-   $sqlSelectISBNReviews = "SELECT * FROM reviews WHERE ISBN = '$isvn'";
+   $sqlSelectISBNReviews = "SELECT * FROM reviews WHERE ISBN = '$isbn'";
    if($result = mysqli_query($conn, $sqlSelectISBNReviews)){
 
-         $sqlDeleteReview = "DELETE FROM reviews WHERE ID = '$id'";
-
-         $sqlSelectInnerJoin = "SELECT usersbooks.ID, posts.ID, posts.CommentID FROM usersbooks INNER JOIN reviews ON usersbooks.ReviewID = reviews.ID INNER JOIN posts ON reviews.ID = posts.ReviewID WHERE reviews.ID='$id'";
+         $sqlSelectUsersBook = "SELECT usersbooks.ID, usersbooks.PageID FROM usersbooks WHERE usersbooks.ReviewID='$id'";
 
 
-         if($resultSelectInnerJoin = mysqli_query($conn, $sqlSelectInnerJoin)){
-            $innerJoinArray = mysqli_fetch_array($resultSelectUserBookID, MYSQLI_ASSOC);
+         if($resultSelectUsersBook = mysqli_query($conn, $sqlSelectUsersBook)){
+            $userBooksArray = mysqli_fetch_array($resultSelectUsersBook, MYSQLI_ASSOC);
             //check if this below works 
-            $userbooksID = $innerJoinArray['usersbooks.ID'];
-            $postsID = $innerJoinArray['posts.ID'];
-            $commentID = $innerJoinArray['CommentID'];
+            $userBooksID = $userBooksArray['ID'];
+            $pagesID = $userBooksArray['PageID'];
 
-            $sqlDeleteUserBookID = "DELETE FROM usersbooks WHERE ID='$userBookID'";
+            $sqlSelectAllPosts = "SELECT ID, CommentID FROM posts WHERE posts.ReviewID='$id'";
+
+            if($resultSqlSelectAllPosts = mysqli_query($conn, $sqlSelectAllPosts)){
+               while($row = mysqli_fetch_assoc($resultSqlSelectAllPosts)){
+                  $postsID = $row['ID'];
+                  $commentID = $row['CommentID'];
+
+                  $sqlDeletePostsID = "DELETE FROM posts WHERE ID='$postsID'";
+                  mysqli_query($conn, $sqlDeletePostsID);
+
+                  $sqlDeleteCommentID = "DELETE FROM comments WHERE ID='$commentID'";
+                  mysqli_query($conn, $sqlDeleteCommentID);
+               }
+               
+            }
+
+            $sqlDeleteUserBookID = "DELETE FROM usersbooks WHERE ID='$userBooksID'";
             mysqli_query($conn, $sqlDeleteUserBookID);
 
-            $sqlDeleteCommentID = "DELETE FROM comments WHERE ID='$commentID'";
-            mysqli_query($conn, $sqlDeleteCommentID);
+            $sqlDeleteReviewID = "DELETE FROM reviews WHERE ID='$id'";
+            mysqli_query($conn, $sqlDeleteReviewID);
 
-            $sqlDeletePostsID = "DELETE FROM posts WHERE ID='$postsID'";
-            mysqli_query($conn, $sqlDeletePostsID);
+            $sqlDeletePagesID = "DELETE FROM pages WHERE ID='$pagesID'";
+            mysqli_query($conn, $sqlDeletePagesID);
+
          }
 
       if(mysqli_num_rows($result) == 1){
 
          $sqlSelectAuthors = "SELECT * FROM books WHERE Author='$author'";
-         if($resultAuthor = mysqli_query($conn, $sqlSelectAuthor)){
+         if($resultAuthor = mysqli_query($conn, $sqlSelectAuthors)){
             if(mysqli_num_rows($resultAuthor) > 1){
                $sqlDeleteBook = "DELETE FROM books WHERE ISBN='$isbn'";
                mysqli_query($conn, $sqlDeleteBook);
@@ -418,7 +432,6 @@ function setBackgroundURL($conn, $email){
    if($result = mysqli_query($conn, $sqlSelectBackground)){
       $backgroundArray = mysqli_fetch_array($result, MYSQLI_ASSOC);
       $_SESSION['bg-image'] = $backgroundArray['BackgroundURL'];
-      header('Location: /coursework/index.php');
    }
 }
 

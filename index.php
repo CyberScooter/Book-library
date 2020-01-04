@@ -12,9 +12,9 @@
     }
 
     // //
-    // if(isset($_GET['profile'])){
-    //     header('Location: ./profile/index.php');
-    // }
+    if(isset($_GET['profile'])){
+        header('Location: ./profile/index.php');
+    }
 
     global $error;
     if(isset($_SESSION['errmessage'])){

@@ -82,6 +82,14 @@ if(isset($_POST['deleteComment'])){
 
 }
 
+if(isset($_POST['deleteBook'])){
+    $deleteISBN = $_POST['deleteISBN'];
+    $deleteReviewID = $_POST['deleteReviewID'];
+    $deleteAuthor = $_POST['deleteAuthor'];
+    deleteUserBookReview($conn, $_SESSION['User'], $deleteReviewID, $deleteISBN, $deleteAuthor);
+    header('Location: index.php');
+}
+
 //Error handling
 global $error;
 if(isset($_SESSION['errmessage'])){
@@ -183,6 +191,7 @@ if(isset($_SESSION['errmessage'])){
                     <input class="Button" type="submit" name="deleteBook" value="Delete Book">
                     <input type="hidden" name="deleteISBN" value="<?php echo $bookReviewArray[$i]['ISBN'] ?>">
                     <input type="hidden" name="deleteReviewID" value="<?php echo $userBooksArray[$i]['ReviewID'] ?>">
+                    <input type="hidden" name="deleteAuthor" value="<?php echo $bookDetailsArray[$i]['Author'] ?>">
             </form>
         <?php } ?>
 
