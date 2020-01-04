@@ -57,7 +57,7 @@
             <input class="TextBox" type="text" placeholder="Enter author DOB in (yyyy-mm-dd) format" name="authorDOB">
             <input class="TextBox" type="text" placeholder="Enter total pages" name="totalPages">
             <input class="TextBox" type="text" placeholder="Enter pages read" name="pagesRead">
-            <input type="checkbox" name="visibility" value="visible" checked>Visible</input>
+            <input type="checkbox" name="visibility" value="visible" checked>Public</input>
             <input class="TextBox" type="file" name="fileinput"/>
             <?php if($showReviewInputs){ ?>
             <input class="TextBox" type="text" placeholder="Enter review" name="review">

@@ -11,6 +11,14 @@ global $commentsDateCreated;
 
 global $booksData;
 
+
+//Allows use to upgrade to premium if they're already not a premium user
+
+$premiumButton = false;
+if(isset($_POST['premium'])){
+    upgradeToPremium($conn, $_SESSION['User']); 
+}
+
 //If user is on another person's profile:
 if(isset($_GET['user'])){
     $profileData = searchUser($conn, $_GET['user']);
@@ -22,21 +30,10 @@ if(isset($_GET['user'])){
 if(!isset($_GET['user']) && isset($_SESSION['User']) ){
     $username = getUsernameFromUsersTable($conn, $_SESSION['User']);    
     $profileData = searchUser($conn, $username);
+    $premiumButton = checkIfStandardUser($conn, $_SESSION['User']);
 }
 
-//
-//TO DELETE MAYBE:
-
-// global $editProfile;
-// $editProfile = false;
-// if(isset($_POST['edit'])){
-//     $editProfile = true;
-// }
-
-//delete book
-
-
-//Comment operations
+//Comment operations:
 
 if(isset($_POST['addComment'])){
     $id = $_POST['id'];
@@ -69,7 +66,8 @@ if(isset($_POST['deleteComment'])){
 
 }
 
-//Error handling
+//Error handling:
+
 global $error;
 if(isset($_SESSION['errmessage'])){
     $error = $_SESSION['errmessage'];
@@ -83,20 +81,20 @@ if(isset($_SESSION['errmessage'])){
 
 
     <!-- User session needs to be set in order to access profile-->
-    <?php if(isset($_SESSION['User'])){ ?>
+<?php if(isset($_SESSION['User'])){ ?>
 
-        <h2 class="error"><?php echo $error ?></h2>
+    <h2 class="error"><?php echo $error ?></h2>
 
-        <div class="container">
+    <div class="container">
 
-        <form action="index.php" method="GET">
-            <input class="SearchBox" type="text" placeholder="Search for a user" name="user">
-            <input class="Search" type="submit" value="Search"> 
-        </form>
+    <form action="index.php" method="GET">
+        <input class="SearchBox" type="text" placeholder="Search for a user" name="user">
+        <input class="Search" type="submit" value="Search"> 
+    </form>
 
-        <?php if($profileData != null) { ?>
+    <?php if($profileData != null) { ?>
 
-        <!-- Displays specific data based on whether the user is on their own profile or someone elses -->
+        <!-- Displays specific data based on whether the user is on their own profile or someone else's -->
         <hr> 
         <h1><?php echo (isset($_GET['user']) ? 'User: ' : 'Welcome ')?> <?php echo $profileData['Username'] ?> </h1>
         <?php if(checkIfPremiumUser($conn, $_SESSION['User'])) { ?>
@@ -112,96 +110,103 @@ if(isset($_SESSION['errmessage'])){
 
 
     <p><?php echo (isset($_GET['user'])) ? '<a class="Button" href="index.php"> Return to my profile </a>' : '<a class="Button" href="edit.php"> Edit profile </a>' ?></p>
+    <?php if($premiumButton && !isset($_GET['user'])){ ?>
+        <form action="index.php" method="post"> 
+            <input type="submit" class="Button" value="Upgrade to premium" />
+            <input type="hidden" name="premium">
+        </form>
+    <?php } ?>
 
     <!-- BOOKS SECTION -->
-
-
 
     <!-- Makes sure there is data set for books so that it doesnt loop through nothing and cause an error-->
     <?php if(isset($booksData)){ ?>
         <hr>
         <h2 style="font-size:2rem"> Books: </h2>
 
-    <!-- This loops through each review made by a user and the index of each one is referenced by the index location '$i' -->
-    <?php   foreach($booksData as $i => $item){ ?>
-    
-    <!-- CSS properties used to make it easier to visualise and see the data on the web page  -->
-    <div class="BookReview">
-
-    <!-- This if statement below determines access privileges to view the books displayed on the page -->
-    <!-- Certain constraints need to be made for instance if there was a the case if a user makes their book private it should not be seen by anyone else except themselves -->
-    <!-- The first part of if statement makes sure that the book is visible and the current user is viewing another profile -->
-    <!-- The second part of the if statement makes sure that the book is visible and the user is on their own profile -->
-    <!-- The third part of the if statement makes sure that the if the book is on private and the user is on their own profile then the book should be seen as it is their own -->
-
-    <?php if(($booksData[$i]['Visible'] && isset($_GET['user'])) || ($booksData[$i]['Visible'] && !isset($_GET['user'])) || (!$booksData[$i]['Visible'] && !isset($_GET['user']))  ){ ?>
+        <!-- This loops through each review made by a user and the index of each one is referenced by the index location '$i' -->
+        <?php   foreach($booksData as $i => $item){ ?>
         
-        <p><span>ISBN:</span> <?php echo $booksData[$i]['ISBN'] ?></p>
-        <p><span>Title:</span> <?php echo $booksData[$i]['Title'] ?></p>
-        <p> <img src="/coursework/resources/books/<?php echo $booksData[$i]['Picture'] ?>" /></p>
-        <p><span>Description:</span> <?php echo $booksData[$i]['Description'] ?></p>
-        <p><span>Author:</span> <?php echo $booksData[$i]['Author'] ?></p>
-        <p><span>Date released:</span> <?php echo $booksData[$i]['DateReleased'] ?></p>
-        <p><span>Read</span> <?php echo $booksData[$i]['Page'] ?> out of <?php echo $booksData[$i]['TotalPages'] ?> pages in the book</p>
-        <p><span>Created at :</span> <?php echo $booksData[$i]['created_at']?></p>
+            <!-- CSS properties used to make it easier to visualise and see the data on the web page  -->
+            <div class="BookReview">
 
-        <?php if( (int) $booksData[$i]['Page'] == (int) $booksData[$i]['TotalPages']   ){ ?>
-            <p><span>Review:</span> <?php echo $booksData[$i]['Review']?></p>
-            <p><span>Rating:</span> <?php echo $booksData[$i]['Rating']?></p>
-        <?php } ?>
+            <!-- This if statement below determines access privileges to view the books displayed on the page -->
+            <!-- Certain constraints need to be made for instance if there was a the case if a user makes their book private it should not be seen by anyone else except themselves -->
+            <!-- The first part of the if statement makes sure that the book is visible and the user is on their own profile -->
+            <!-- The second part of the if statement makes sure that the if the book is on private and the user is on their own profile then the book should be seen as it is their own -->
 
-        <?php if(!isset($_GET['user'])){ ?>
-            <a class="Button" href="/coursework/book/edit.php?id=<?php echo $booksData[$i]['ID'] ?>"> Update Book details</a>
-            <form action="index.php" method="post">
-                    <input class="Button" type="submit" name="deleteBook" value="Delete Book">
-                    <input type="hidden" name="deleteISBN" value="<?php echo $booksData[$i]['ISBN'] ?>">
-                    <input type="hidden" name="deleteReviewID" value="<?php echo $booksData[$i]['ReviewID'] ?>">
-                    <input type="hidden" name="deleteAuthor" value="<?php echo $booksData[$i]['Author'] ?>">
-            </form>
-        <?php } ?>
+            <?php if(($booksData[$i]['Visible'] && isset($_GET['user'])) || ($booksData[$i]['Visible'] && !isset($_GET['user'])) || (!$booksData[$i]['Visible'] && !isset($_GET['user']))  ){ ?>
+                
+                <p><span>ISBN:</span> <?php echo $booksData[$i]['ISBN'] ?></p>
+                <p><span>Title:</span> <?php echo $booksData[$i]['Title'] ?></p>
+                <p> <img src="/coursework/resources/books/<?php echo $booksData[$i]['Picture'] ?>" /></p>
+                <p><span>Description:</span> <?php echo $booksData[$i]['Description'] ?></p>
+                <p><span>Author:</span> <?php echo $booksData[$i]['Author'] ?></p>
+                <p><span>Date released:</span> <?php echo $booksData[$i]['DateReleased'] ?></p>
+                <p><span>Read</span> <?php echo $booksData[$i]['Page'] ?> out of <?php echo $booksData[$i]['TotalPages'] ?> pages in the book</p>
+                <p><span>Created at :</span> <?php echo $booksData[$i]['created_at']?></p>
 
-        <!-- COMMENTS SECTION -->
+                <?php if( (int) $booksData[$i]['Page'] == (int) $booksData[$i]['TotalPages']   ){ ?>
+                    <p><span>Review:</span> <?php echo $booksData[$i]['Review']?></p>
+                    <p><span>Rating:</span> <?php echo $booksData[$i]['Rating']?></p>
+                <?php } ?>
 
-        <!-- This form below allows a comment to be added to a book
-            hidden inputs have been added to the form so that specific data like the ID and the current user is sent so that the comment can be
-            added to a specific book and user 
-        -->
-        <form action="index.php" method="post">
-            <input class="TextBox" type="text" placeholder="Enter a comment" name="comment">
-            <input class="Button"  type="submit" name="addComment" value="Add comment">
-            <input type="hidden" name="id" value="<?php echo $booksData[$i]['ReviewID']; ?>">
-            <input type="hidden" name="user" value="<?php echo (isset($_GET['user'])) ? $_GET['user'] : NULL ?>">
-        </form>
+                <?php if(!isset($_GET['user'])){ ?>
+                    <a class="Button" href="/coursework/book/edit.php?id=<?php echo $booksData[$i]['ID'] ?>"> Update Book details</a>
+                    <form action="index.php" method="post">
+                        <input class="Button" type="submit" name="deleteBook" value="Delete Book">
+                        <input type="hidden" name="deleteISBN" value="<?php echo $booksData[$i]['ISBN'] ?>">
+                        <input type="hidden" name="deleteReviewID" value="<?php echo $booksData[$i]['ReviewID'] ?>">
+                        <input type="hidden" name="deleteAuthor" value="<?php echo $booksData[$i]['Author'] ?>">
+                    </form>
+                <?php } ?>
 
-        <p id="<?php echo $booksData[$i]['ReviewID'] ?>"> <span>Comments:</span> </p>
+                <!-- COMMENTS SECTION -->
 
-        <!--
-            An appropriate function from the db_operations.php file is called that selects all the required commenting data for the review
-            so that it can be displayed onto the web page.
-            An if statement is added inside the block of code below to determine if the comment belongs to the user, if so then delete option can be added
-        -->
-        <?php list($comments, $commentsDateCreated, $user, $commentId) = selectCommentsFromReview($conn, $booksData[$i]['ReviewID']);?>
-        <?php for($j = 0; $j < count($comments); $j++){?>
-            <div class="Comment"><span><span class="BoldComment"><?php echo $user[$j] ?></span>: <?php echo $comments[$j] ?></span><span><span class="BoldComment">Added:</span> <?php echo $commentsDateCreated[$j] ?> </span></div>
-            <?php if($user[$j] == getUsernameFromUsersTable($conn, $_SESSION['User'])){ ?>
+                <!-- This form below allows a comment to be added to a book
+                    hidden inputs have been added to the form so that specific data like the ID and the current user is sent so that the comment can be
+                    added to a specific book and user 
+                -->
                 <form action="index.php" method="post">
-                    <input class="DeleteComment" type="submit" name="deleteComment" value="Delete Comment">
-                    <input type="hidden" name="postIDToDelete" value="<?php echo $commentId[$j] ?>">
+                    <input class="TextBox" type="text" placeholder="Enter a comment" name="comment">
+                    <input class="Button"  type="submit" name="addComment" value="Add comment">
+                    <input type="hidden" name="id" value="<?php echo $booksData[$i]['ReviewID']; ?>">
                     <input type="hidden" name="user" value="<?php echo (isset($_GET['user'])) ? $_GET['user'] : NULL ?>">
                 </form>
+
+                <p id="<?php echo $booksData[$i]['ReviewID'] ?>"> <span>Comments:</span> </p>
+
+                <!--
+                    An appropriate function from the db_operations.php file is called that selects all the required comments data for each review
+                    so that it can be displayed onto the web page.
+                    An if statement is added inside the block of code below to determine if the comment belongs to the user, if so then delete option can be added
+                -->
+                <?php list($comments, $commentsDateCreated, $user, $commentId) = selectCommentsFromReview($conn, $booksData[$i]['ReviewID']);?>
+                <?php for($j = 0; $j < count($comments); $j++){?>
+                    <div class="Comment"><span><span class="BoldComment"><?php echo $user[$j] ?></span>: <?php echo $comments[$j] ?></span><span><span class="BoldComment">Added:</span> <?php echo $commentsDateCreated[$j] ?> </span></div>
+                    <?php if($user[$j] == getUsernameFromUsersTable($conn, $_SESSION['User'])){ ?>
+                        <form action="index.php" method="post">
+                            <input class="DeleteComment" type="submit" name="deleteComment" value="Delete Comment">
+                            <input type="hidden" name="postIDToDelete" value="<?php echo $commentId[$j] ?>">
+                            <input type="hidden" name="user" value="<?php echo (isset($_GET['user'])) ? $_GET['user'] : NULL ?>">
+                        </form>
+                    <?php } ?>
+                <?php } ?>
+
+                <hr>
+
             <?php } ?>
+
+        </div>
+
         <?php } ?>
 
-        <hr>
-
     <?php } ?>
 
-    </div>
-    <?php } ?>
-    <?php } ?>
+<?php }else { ?>
 
-    <?php }else { ?>
-        <h1> Login/register required </h1>
-    <?php } ?>
+    <h1> Login/register required </h1>
+    
+<?php } ?>
 
 <?php include '../templates/footer.php'; ?>

@@ -6,12 +6,9 @@ include "../db_operations.php";
 include "../config/db_connection.php";
 
 if(isset($_GET['id'])){
-    global $bookReviewID;
     $bookReviewID = $_GET['id'];
-    global $showReviewInputs;
-    $showReviewInputs = checkPagesReadAndTotalPagesEqual($conn, $bookReviewID, $_SESSION['User']);
-    global $bookReviewData;
     $bookReviewData = getOneUserBookReview($conn, $_SESSION['User'], $bookReviewID);
+    $showReviewInputs = checkPagesReadAndTotalPagesEqual($conn, $bookReviewID, $_SESSION['User']);
 }
 
 if(isset($_POST['submit'])){
@@ -36,17 +33,13 @@ if(isset($_POST['submit'])){
                 incrementPrivatePostReviews($conn, $_SESSION['User']);
             }
         }
-        $rating > 10 ? header('Location: /coursework/book/index.php') : $bookReviewData = updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, $visible);
+        ($rating > 10 || $rating < 0)? $_SESSION['errmessage'] = "Invalid rating please retry, rating should be between 0-10": $bookReviewData = updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, $visible);
     }
     header('Location: /coursework/book/index.php');
     
 }
 
 ?>
-
-
-
-
 
 <?php include '../templates/header.php'; ?>
 
@@ -63,7 +56,7 @@ if(isset($_POST['submit'])){
             <input id="FixedTextBox" class="TextBox" type="text" value="<?php echo $bookReviewData['TotalPages'] ?>" placeholder="Enter total pages" name="totalPages" readonly>
             <input class="TextBox" type="text" value="<?php echo $bookReviewData['Page'] ?>" placeholder="Enter pages read" name="pagesRead">
             
-            <input type="checkbox" name="visibility" value="visible" <?php echo ($bookReviewData['Visible']) ? 'checked' : null ?>> Visible </input>
+            <input type="checkbox" name="visibility" value="visible" <?php echo ($bookReviewData['Visible']) ? 'checked' : null ?>> Public </input>
             <input type="hidden" name="previousVisiblity" value="<?php echo ($bookReviewData['Visible']) ? 'visible' : null ?>" >
 
             <input class="TextBox" type="file" name="fileinput"/>

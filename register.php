@@ -16,12 +16,12 @@ if(isset($_POST['registerStandard'])){
     }
 }
 
-global $error;
 /**
  * If the error message session is set
  * then set the 'error' variable to be rendered in html to the error message
  * finally unset/clear the session variable for the error so that it doesnt display error after refresh
  */
+global $error;
 if(isset($_SESSION['errmessage'])){
     $error = $_SESSION['errmessage'];
 }
@@ -31,7 +31,7 @@ unset($_SESSION['errmessage']);
 
 <?php include './templates/header.php'; ?>
 
-    <?php if(!isset($_SESSION['User'])){ ?>
+<?php if(!isset($_SESSION['User'])){ ?>
 
     <p class="error"><?php echo $error ?></p>
     <form action="register.php" method="POST">
@@ -42,10 +42,10 @@ unset($_SESSION['errmessage']);
         <input class="Button" type="submit" name="registerStandard" value="Register">
     </form>
 
-    <?php }else{ ?>
+<?php } else { ?>
 
-        <p> Session is already active </p>
-        
-    <?php } ?>
+    <p> Session is already active </p>
+    
+<?php } ?>
 
 <?php include './templates/footer.php'; ?>

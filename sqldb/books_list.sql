@@ -4,7 +4,7 @@ CREATE TABLE users (
   Hash varchar(255) NOT NULL
 );
 
-CREATE TABLE usersbooks (
+CREATE TABLE users_reviews (
   ID int PRIMARY KEY AUTO_INCREMENT,
   ReviewID int NOT NULL,
   Email varchar(255) NOT NULL,
@@ -73,9 +73,9 @@ CREATE TABLE standard (
 
 );
 
-ALTER TABLE usersbooks ADD FOREIGN KEY (Email) REFERENCES users (Email);
+ALTER TABLE users_reviews ADD FOREIGN KEY (Email) REFERENCES users (Email);
 
-ALTER TABLE usersbooks ADD FOREIGN KEY (ReviewID) REFERENCES reviews (ID);
+ALTER TABLE users_reviews ADD FOREIGN KEY (ReviewID) REFERENCES reviews (ID);
 
 ALTER TABLE users ADD FOREIGN KEY (Username) REFERENCES profile (Username);
 
@@ -83,7 +83,7 @@ ALTER TABLE reviews ADD FOREIGN KEY (ISBN) REFERENCES books (ISBN);
 
 ALTER TABLE books ADD FOREIGN KEY (Author) REFERENCES author (Name);
 
-ALTER TABLE usersbooks ADD FOREIGN KEY (PageID) REFERENCES pages (ID);
+ALTER TABLE users_reviews ADD FOREIGN KEY (PageID) REFERENCES pages (ID);
 
 ALTER TABLE posts ADD FOREIGN KEY (CommentID) REFERENCES comments (ID);
 
