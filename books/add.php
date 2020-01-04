@@ -20,8 +20,8 @@
         $review = NULL;
         $rating = 0;
         if(isset($_POST['review'])){
-            $review = htmlspecialchars($_POST['review'];
-            $rating = htmlspecialchars($_POST['rating'];
+            $review = htmlspecialchars($_POST['review']);
+            $rating = htmlspecialchars($_POST['rating']);
         }
         if($pagesRead == $totalPages){
             $showReviewInputs = true;
@@ -35,7 +35,7 @@
                 decrementStandardLimitReviews($conn, $_SESSION['User']);
             }
             saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating, $picture, $visible);
-            header('Location: /coursework/book/index.php');
+            header('Location: /books/index.php');
             exit();
         }
 

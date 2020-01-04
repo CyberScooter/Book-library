@@ -208,7 +208,7 @@ function getOneUserBookReview($conn, $email, $id){
       //Redirects to books index page if another invalid index tries to be accessed from url to edit page
       if(mysqli_num_rows($resultUsersReviews) == 0){
          
-         header('Location: /coursework/book/index.php');
+         header('Location: /books/index.php');
          exit();
       }
       $usersReviewsArray = mysqli_fetch_array($resultUsersReviews, MYSQLI_ASSOC);
@@ -504,7 +504,7 @@ function incrementStandardLimitReviews($conn, $email){
       $sqlUpdateStandard = "UPDATE standard SET BooksLimit='$booksLimit' WHERE Email = '$email'";
       $resultUpdate = mysqli_query($conn, $sqlUpdateStandard);
    }else{
-      header('Location: /coursework/profile/index.php');
+      header('Location: /profile/index.php');
       $_SESSION['errmessage'] = "Book limit reached";
       exit();   
    }
@@ -519,7 +519,7 @@ function decrementStandardLimitReviews($conn, $email){
       $sqlUpdateStandard = "UPDATE standard SET BooksLimit='$booksLimit' WHERE Email = '$email'";
       $resultUpdate = mysqli_query($conn, $sqlUpdateStandard);
    }else{
-      header('Location: /coursework/profile/index.php');
+      header('Location: /profile/index.php');
       $_SESSION['errmessage'] = "Book limit reached";
       exit();   
    }
@@ -535,7 +535,7 @@ function decrementPrivatePostReviews($conn, $email){
       $resultUpdate = mysqli_query($conn, $sqlUpdateStandard);
    }else{
       $_SESSION['errmessage'] = "Private posts limit reached";
-      header('Location: /coursework/profile/index.php');
+      header('Location: /profile/index.php');
       exit();   
    }
 }
@@ -570,7 +570,7 @@ function checkStandardBooksLimit($conn, $email){
 
 function errorRedirect(){
    $_SESSION['errmessage'] = 'Error description: ' . mysqli_error($conn);
-   header('Location: /coursework/index.php');
+   header('Location: /index.php');
 }
 
 

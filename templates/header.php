@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="/coursework/resources/index.css">
+    <link rel="stylesheet" href="/resources/index.css">
     <title>Books list</title>
     <style>
         body {
@@ -35,17 +35,17 @@
 
         <!-- These REQUEST_URI gets the current URL the user is on, this is compared with specific urls and is used to make an active css property on the navitems-->
 
-        <li><a <?php echo ($_SERVER['REQUEST_URI'] == "/coursework/index.php") ? 'class="active"' : NULL ?> href="/coursework/index.php">Home</a></li>
+        <li><a <?php echo ($_SERVER['REQUEST_URI'] == "/index.php") ? 'class="active"' : NULL ?> href="/index.php">Home</a></li>
 
         <?php if(isset($_SESSION['User'])) { ?>
-            <li><a <?php echo ($_SERVER['REQUEST_URI'] == "/coursework/profile/index.php") ? 'class="active"' : NULL ?> href="/coursework/profile/index.php">Profile</a></li>
-            <li><a <?php echo ($_SERVER['REQUEST_URI'] == "/coursework/book/add.php") ? 'class="active"' : NULL ?> href="/coursework/book/index.php">My Books</a></li>
+            <li><a <?php echo ($_SERVER['REQUEST_URI'] == "/profile/index.php") ? 'class="active"' : NULL ?> href="/profile/index.php">Profile</a></li>
+            <li><a <?php echo ($_SERVER['REQUEST_URI'] == "/books/add.php") ? 'class="active"' : NULL ?> href="/books/index.php">My Books</a></li>
             <!-- This sends a GET request which is triggered by an HTML element, it redirect to the landing page and has a query of 'logout' which is read by the
             isset global 'GET' variable stored in that file that unsets the session which would basically logout the user -->
-            <li style="float:right"><a href="/coursework/index.php?logout" name="Logout">Logout </a></li>
+            <li style="float:right"><a href="/index.php?logout" name="Logout">Logout </a></li>
         <?php }else { ?>
-            <li style="float:right"><a href="/coursework/register.php">Register</a></li>
-            <li style="float:right"><a href="/coursework/login.php">Login</a></li>
+            <li style="float:right"><a href="/register.php">Register</a></li>
+            <li style="float:right"><a href="/login.php">Login</a></li>
         <?php } ?>
 
     </ul>

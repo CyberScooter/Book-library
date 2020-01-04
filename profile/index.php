@@ -98,11 +98,11 @@ if(isset($_SESSION['errmessage'])){
         <hr> 
         <h1><?php echo (isset($_GET['user']) ? 'User: ' : 'Welcome ')?> <?php echo $profileData['Username'] ?> </h1>
         <?php if(checkIfPremiumUser($conn, $_SESSION['User'])) { ?>
-            <img width="50px" height="50px" src="<?php echo ($profileData['BadgeURL'] != null) ? "/coursework/resources/badges/".$profileData['BadgeURL'] : "" ?>" />
+            <img width="50px" height="50px" src="<?php echo ($profileData['BadgeURL'] != null) ? "/resources/badges/".$profileData['BadgeURL'] : "" ?>" />
         <?php } ?>
 
         <h2> Bio: <?php echo ($profileData['Bio'] == null) ? ((isset($_GET['user'])) ? 'Nothing to show' : 'No bio added, try adding one') : $profileData['Bio'] ?> </h2>
-        <div class="Picture"><img class="ProfilePicture" src="<?php echo (file_exists($profileData['Picture'])) ? $profileData['Picture'] : '/coursework/resources/pixabay-pp.png' ?>"/></div>
+        <div class="Picture"><img class="ProfilePicture" src="<?php echo (file_exists($profileData['Picture'])) ? $profileData['Picture'] : '/resources/pixabay-pp.png' ?>"/></div>
 
     <?php } ?>
 
@@ -139,7 +139,7 @@ if(isset($_SESSION['errmessage'])){
                 
                 <p><span class="Attributes"> ISBN:</span> <?php echo $booksData[$i]['ISBN'] ?></p>
                 <p><span class="Attributes"> Title:</span> <?php echo $booksData[$i]['Title'] ?></p>
-                <p> <img src="/coursework/resources/books/<?php echo $booksData[$i]['Picture'] ?>" /></p>
+                <p> <img src="/resources/books/<?php echo $booksData[$i]['Picture'] ?>" /></p>
                 <p><span class="Attributes"> Description:</span> <?php echo $booksData[$i]['Description'] ?></p>
                 <p><span class="Attributes"> Author:</span> <?php echo $booksData[$i]['Author'] ?></p>
                 <p><span class="Attributes"> Date released:</span> <?php echo $booksData[$i]['DateReleased'] ?></p>
@@ -152,7 +152,7 @@ if(isset($_SESSION['errmessage'])){
                 <?php } ?>
 
                 <?php if(!isset($_GET['user'])){ ?>
-                    <a class="Button" href="/coursework/book/edit.php?id=<?php echo $booksData[$i]['ID'] ?>"> Update Book details</a>
+                    <a class="Button" href="/books/edit.php?id=<?php echo $booksData[$i]['ID'] ?>"> Update Book details</a>
                     <form action="index.php" method="post">
                         <input class="Button" type="submit" name="deleteBook" value="Delete Book">
                         <input type="hidden" name="deleteISBN" value="<?php echo $booksData[$i]['ISBN'] ?>">

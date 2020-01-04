@@ -35,7 +35,7 @@ if(isset($_POST['submit'])){
         }
         ($rating > 10 || $rating < 0)? $_SESSION['errmessage'] = "Invalid rating please retry, rating should be between 0-10": $bookReviewData = updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, $visible);
     }
-    header('Location: /coursework/book/index.php');
+    header('Location: /books/index.php');
     
 }
 
