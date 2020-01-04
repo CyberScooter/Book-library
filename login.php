@@ -6,8 +6,8 @@
     
     // If login button is pressed
     if(isset($_POST['login'])){
-        $email = $_POST['email'];
-        $password = $_POST['password'];
+        $email = htmlspecialchars($_POST['email']);
+        $password = htmlspecialchars($_POST['password']);
         if($email != null && $password != null){
             loginUser($conn, $_POST['email'], $_POST['password']);
         }else{

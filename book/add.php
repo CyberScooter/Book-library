@@ -6,22 +6,22 @@
     $showReviewInputs = false;
     
     if(isset($_POST['submit'])){
-        $email = $_SESSION['User'];
-        $isbn = $_POST['isbn'];
-        $title = $_POST['title'];
-        $releaseDate = $_POST['releasedDate'];
-        $description = $_POST['description'];
-        $author = $_POST['author'];
-        $authorDOB = $_POST['authorDOB'];
-        $totalPages = $_POST['totalPages'];
-        $pagesRead = $_POST['pagesRead'];
-        $picture = $_POST['fileinput'];
+        $email = htmlspecialchars($_SESSION['User']);
+        $isbn = htmlspecialchars($_POST['isbn']);
+        $title = htmlspecialchars($_POST['title']);
+        $releaseDate = htmlspecialchars($_POST['releasedDate']);
+        $description = htmlspecialchars($_POST['description']);
+        $author = htmlspecialchars($_POST['author']);
+        $authorDOB = htmlspecialchars($_POST['authorDOB']);
+        $totalPages = htmlspecialchars($_POST['totalPages']);
+        $pagesRead = htmlspecialchars($_POST['pagesRead']);
+        $picture = htmlspecialchars($_POST['fileinput']);
         $badge = null;
         $review = NULL;
         $rating = 0;
         if(isset($_POST['review'])){
-            $review = $_POST['review'];
-            $rating = $_POST['rating'];
+            $review = htmlspecialchars($_POST['review'];
+            $rating = htmlspecialchars($_POST['rating'];
         }
         if($pagesRead == $totalPages){
             $showReviewInputs = true;

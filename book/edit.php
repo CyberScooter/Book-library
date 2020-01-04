@@ -13,14 +13,14 @@ if(isset($_GET['id'])){
 
 if(isset($_POST['submit'])){
     $email = $_SESSION['User'];
-    $id = $_POST['id'];
-    $pagesRead = $_POST['pagesRead'];
-    $totalPages = $_POST['totalPages'];
+    $id = htmlspecialchars($_POST['id']);
+    $pagesRead = htmlspecialchars($_POST['pagesRead']);
+    $totalPages = htmlspecialchars($_POST['totalPages']);
     $visible = $_POST['visibility'] == 'visible' ? true : false;
     if((int) $pagesRead <= (int) $totalPages && $pagesRead >= 0){
         if(isset($_POST['review'])){
-            $review = $_POST['review'];
-            $rating = $_POST['rating'];
+            $review = htmlspecialchars($_POST['review']);
+            $rating = htmlspecialchars($_POST['rating']);
         }else {
             $review = NULL;
             $rating = 0;

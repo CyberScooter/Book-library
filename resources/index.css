@@ -36,9 +36,6 @@
   font-weight: bold;
 }
 
-
-
-
 .ProfilePicture {
   display: block;
   width: 100%;
@@ -53,7 +50,7 @@
   font-size: 1.8rem;
 }
 
-.BookReview span {
+.BookReview .Attributes {
   font-weight: bold;
   color: 	black;
 }

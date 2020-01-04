@@ -36,7 +36,7 @@ if(isset($_POST['deleteBook'])){
 
 if(isset($_POST['addComment'])){
     $id = $_POST['id'];
-    $comment = $_POST['comment'];
+    $comment = htmlspecialchars($_POST['comment']);
     if($comment != null){
         insertNewComment($conn, $_SESSION['User'], $id, $comment);
     }
@@ -86,19 +86,19 @@ if(isset($_SESSION['errmessage'])){
             <!-- CSS properties used to make it easier to visualise and see the data on the web page  -->
             <div class="BookReview">
 
-                <p><span>ISBN:</span> <?php echo $booksData[$i]['ISBN'] ?></p>
-                <p><span>Title:</span> <?php echo $booksData[$i]['Title'] ?></p>
+                <p><span class="Attributes">ISBN:</span> <?php echo $booksData[$i]['ISBN'] ?></p>
+                <p><span class="Attributes">Title:</span> <?php echo $booksData[$i]['Title'] ?></p>
                 <p> <img src="/coursework/resources/books/<?php echo $booksData[$i]['Picture'] ?>" /></p>
-                <p><span>Description:</span> <?php echo $booksData[$i]['Description'] ?></p>
-                <p><span>Author:</span> <?php echo $booksData[$i]['Author'] ?></p>
-                <p><span>Date released:</span> <?php echo $booksData[$i]['DateReleased'] ?></p>
-                <p><span>Read</span> <?php echo $booksData[$i]['Page'] ?> out of <?php echo $booksData[$i]['TotalPages'] ?> pages in the book</p>
+                <p><span class="Attributes">Description:</span> <?php echo $booksData[$i]['Description'] ?></p>
+                <p><span class="Attributes">Author:</span> <?php echo $booksData[$i]['Author'] ?></p>
+                <p><span class="Attributes">Date released:</span> <?php echo $booksData[$i]['DateReleased'] ?></p>
+                <p><span class="Attributes">Read</span> <?php echo $booksData[$i]['Page'] ?> out of <?php echo $booksData[$i]['TotalPages'] ?> pages in the book</p>
                 <p <?php echo ($booksData[$i]['Visible']) ? 'class="Green"' : 'class="Red"' ?>><?php echo ($booksData[$i]['Visible']) ? 'Public review' : 'Private review' ?></p>
-                <p><span>Created at :</span> <?php echo $booksData[$i]['created_at']?></p>
+                <p><span class="Attributes">Created at :</span> <?php echo $booksData[$i]['created_at']?></p>
 
                 <?php if( (int) $booksData[$i]['Page'] == (int) $booksData[$i]['TotalPages']   ){ ?>
-                    <p><span>Review:</span> <?php echo $booksData[$i]['Review']?></p>
-                    <p><span>Rating:</span> <?php echo $booksData[$i]['Rating']?></p>
+                    <p><span class="Attributes">Review:</span> <?php echo $booksData[$i]['Review']?></p>
+                    <p><span class="Attributes">Rating:</span> <?php echo $booksData[$i]['Rating']?></p>
                 <?php } ?>
 
                 <?php if(!isset($_GET['user'])){ ?>
@@ -124,7 +124,7 @@ if(isset($_SESSION['errmessage'])){
                     <input type="hidden" name="user" value="<?php echo (isset($_GET['user'])) ? $_GET['user'] : NULL ?>">
                 </form>
 
-                <p id="<?php echo $booksData[$i]['ReviewID'] ?>"> <span> Comments: </span></p>
+                <p id="<?php echo $booksData[$i]['ReviewID'] ?>"> <span class="Attributes"> Comments: </span></p>
 
                 <!--
                     An appropriate function from the db_operations.php file is called that selects all the required commenting data for the review

@@ -7,20 +7,18 @@ include "../config/db_connection.php";
 global $profileData;
 $profileData = false;
 
-$premium = checkIfPremiumUser($conn, $_SESSION['User']);
-
 if(isset($_SESSION['User'])){
+    $premium = checkIfPremiumUser($conn, $_SESSION['User']);
     $profileData = getProfileData($conn, $_SESSION['User']);
     if(isset($_POST['update'])){
-        $data = array("Bio"=>$_POST['bio'], "Picture"=>$_POST['picture']);
+        $data = array("Bio"=>htmlspecialchars($_POST['bio']), "Picture"=>htmlspecialchars($_POST['picture']));
         if($premium){
-            $backgroundImage = $_POST['bgImage'];
-            $badge = $_POST['badge'];
+            $backgroundImage = htmlspecialchars($_POST['bgImage']);
+            $badge = htmlspecialchars($_POST['badge']);
         }
         updateProfile($conn, $_SESSION['User'], $data, $backgroundImage, $badge, $premium);
     }
 }
-
 
 ?>
 

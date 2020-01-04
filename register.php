@@ -5,11 +5,21 @@ include "db_operations.php";
 include "./config/db_connection.php";
 
 if(isset($_POST['registerStandard'])){
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    $passConfirmation = $_POST['passwordConfirmation'];
-    $username = $_POST['username'];
+    $email = htmlspecialchars($_POST['email']);
+    $password = htmlspecialchars($_POST['password']);
+    $passConfirmation = htmlspecialchars($_POST['passwordConfirmation']);
+    $username = htmlspecialchars($_POST['username']);
     if($email != null  && $password != null && $passConfirmation != null && $username != null){
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+            $_SESSION['errmessage'] = "Invalid email format";
+            header('Location: ./register.php');
+            exit();
+        }
+        if(strlen($password) <= 8){
+            $_SESSION['errmessage'] = "Password must be more than 8 characters long";
+            header('Location: ./register.php');
+            exit();
+        }
         registerUser($conn, $email, $password, $passConfirmation, $username);
     }else{
         $_SESSION['errmessage'] = 'Fill in all boxes';
