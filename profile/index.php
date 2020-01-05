@@ -21,7 +21,7 @@ if(isset($_POST['premium'])){
 
 //If user is on another person's profile:
 if(isset($_GET['user'])){
-    $profileData = searchUser($conn, $_GET['user']);
+    $profileData = getProfileData($conn, $_GET['user']);
     $username = htmlspecialchars($_GET['user']);
     $booksData = getAllUserBookReviews($conn, $username);
 }
@@ -29,7 +29,7 @@ if(isset($_GET['user'])){
 //User on their own profile
 if(!isset($_GET['user']) && isset($_SESSION['User']) ){
     $username = getUsernameFromUsersTable($conn, $_SESSION['User']);    
-    $profileData = searchUser($conn, $username);
+    $profileData = getProfileData($conn, $username);
     $premiumButton = checkIfStandardUser($conn, $_SESSION['User']);
 }
 
@@ -102,7 +102,7 @@ if(isset($_SESSION['errmessage'])){
         <?php } ?>
 
         <h2> Bio: <?php echo ($profileData['Bio'] == null) ? ((isset($_GET['user'])) ? 'Nothing to show' : 'No bio added, try adding one') : $profileData['Bio'] ?> </h2>
-        <div class="Picture"><img class="ProfilePicture" src="<?php echo (file_exists($profileData['Picture'])) ? $profileData['Picture'] : '/resources/pixabay-pp.png' ?>"/></div>
+        <div class="Picture"><img class="ProfilePicture" src="<?php echo (@fopen($profileData['Picture'], 'r')) ? $profileData['Picture'] : '/resources/pixabay-pp.png' ?>"/></div>
 
     <?php } ?>
 

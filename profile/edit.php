@@ -9,14 +9,15 @@ $profileData = false;
 
 if(isset($_SESSION['User'])){
     $premium = checkIfPremiumUser($conn, $_SESSION['User']);
-    $profileData = getProfileData($conn, $_SESSION['User']);
+    $profileData = getProfileData($conn, getUsernameFromUsersTable($conn, $_SESSION['User']));
     if(isset($_POST['update'])){
-        $data = array("Bio"=>htmlspecialchars($_POST['bio']), "Picture"=>htmlspecialchars($_POST['picture']));
+        $bio = $_POST['bio'];
+        $picture = $_POST['picture'];
         if($premium){
             $backgroundImage = htmlspecialchars($_POST['bgImage']);
             $badge = htmlspecialchars($_POST['badge']);
         }
-        updateProfile($conn, $_SESSION['User'], $data, $backgroundImage, $badge, $premium);
+        updateProfile($conn, $_SESSION['User'], $bio, $picture, $backgroundImage, $badge, $premium);
     }
 }
 
@@ -35,7 +36,7 @@ if(isset($_SESSION['User'])){
             <input class="TextBox" type="text" placeholder="Enter Web URL of new background picture" name="bgImage" 
                 value = "<?php echo (isset($_SESSION['bg-image'])) ? $_SESSION['bg-image'] : NULL?>">
                 Enter Badge file again:
-            <input class="TextBox" type="file" name="badge"> 
+            <input class="TextBox" type="file" name="badge" value = "<?php echo $profileData['BadgeURL']?>"> 
         <?php } ?>
         <input class="Button" type="submit" name="update" value="Update">
     </form>

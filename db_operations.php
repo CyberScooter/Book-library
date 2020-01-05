@@ -53,7 +53,7 @@ function loginUser($conn, $email, $password){
 
 //=================================================================================================================================================================
 
-//BOOK/BOOK REVIEWS RELATED OPERATIONS:
+//BOOK/BOOK REVIEWS/FAVOURITE BOOKS RELATED OPERATIONS:
 
 function checkExistingBook($conn, $email, $isbn){
    $sqlSelectBook = "SELECT ISBN FROM books WHERE ISBN='$isbn'";
@@ -293,6 +293,11 @@ function deleteUserBookReview($conn, $email, $id, $isbn, $author){
          $sqlDeletePagesID = "DELETE FROM pages WHERE ID='$pagesID'";
          mysqli_query($conn, $sqlDeletePagesID);
 
+         if(checkFavouriteBook($conn, $email, $id)){
+            $sqlDeleteFavourites = "DELETE FROM favourites WHERE Email='$email' AND ReviewID='$id'";
+            mysqli_query($conn, $sqlDeleteFavourites);
+         }
+
       }
 
       if(mysqli_num_rows($result) == 1){
@@ -320,6 +325,63 @@ function deleteUserBookReview($conn, $email, $id, $isbn, $author){
          incrementStandardLimitReviews($conn, $email);
       }
    }
+}
+
+function addBookToFavourite($conn, $email, $reviewID){
+   $sqlInsertFavourites = "INSERT INTO favourites(Email,ReviewID) VALUES('$email','$reviewID')";
+   mysqli_query($conn, $sqlInsertFavourites);
+
+}
+
+function selectAllFavouriteBooks($conn, $email){
+   $favouriteBooksData = array();
+
+   $sqlSelectFavouriteBooks = "SELECT ReviewID FROM favourites";
+   $resultFavouriteBooks = mysqli_query($conn, $sqlSelectFavouriteBooks);
+
+   while($row = mysqli_fetch_assoc($resultFavouriteBooks)) {
+      $favouriteBooksData[] = $row;
+   }
+
+   foreach($favouriteBooksData as $i => $item){
+      $reviewID = $favouriteBooksData[$i]['ReviewID'];
+      $sqlSelectReviews = "SELECT ISBN, Review, Rating FROM reviews WHERE ID='$reviewID'";
+      $resultReviews = mysqli_query($conn, $sqlSelectReviews);
+      while($row = mysqli_fetch_assoc($resultReviews)) {
+         $favouriteBooksData[$i]['ISBN'] = $row['ISBN'];
+         $favouriteBooksData[$i]['Rating'] = $row['Rating'];
+         $favouriteBooksData[$i]['Review'] = $row['Review'];
+      }
+
+      $isbn = $favouriteBooksData[$i]['ISBN'];
+      $sqlSelectBook = "SELECT Author, Title, DateReleased, Description, Picture FROM books WHERE ISBN='$isbn'";
+      $resultBook = mysqli_query($conn, $sqlSelectBook);
+
+      while($row = mysqli_fetch_assoc($resultBook)) {
+         $favouriteBooksData[$i]['Author'] = $row['Author'];
+         $favouriteBooksData[$i]['Title'] = $row['Title'];
+         $favouriteBooksData[$i]['DateReleased'] = $row['DateReleased'];
+         $favouriteBooksData[$i]['Picture'] = $row['Picture'];
+         $favouriteBooksData[$i]['Description'] = $row['Description'];
+      }
+   }
+
+   return $favouriteBooksData;
+}  
+
+function deleteFromFavourites($conn, $email, $reviewID){
+   $sqlDeleteFromFavourites = "DELETE FROM favourites WHERE Email='$email' AND ReviewID='$reviewID'";
+   mysqli_query($conn, $sqlDeleteFromFavourites);
+}
+
+
+function checkFavouriteBook($conn, $email, $reviewID){
+   $sqlSelectBook = "SELECT ReviewID from favourites WHERE ReviewID='$reviewID' AND Email='$email'";
+   $result = mysqli_query($conn, $sqlSelectBook);
+   if(mysqli_num_rows($result) == 1){
+      return true;
+   }
+   return false;
 }
 
 //=================================================================================================================================================================
@@ -392,24 +454,37 @@ function getUsernameFromUsersTable($conn, $email){
    return $userArray['Username'];
 }
 
-function updateProfile($conn, $email, $dataArray, $backgroundImageURL, $badgeURL, $premium){
-   $safeBackgroundImageURL = mysqli_real_escape_string($conn, $backgroundImageURL);
-   $safeBadgeURL = mysqli_real_escape_string($conn, $badgeURL);
+function getEmailFromUsersTable($conn, $username){
+   $sqlSelectSubQuery = "SELECT Email FROM users WHERE Username ='$username'";
+   $result = mysqli_query($conn, $sqlSelectSubQuery);
+   $userArray = mysqli_fetch_array($result, MYSQLI_ASSOC);
    
+   return $userArray['Email'];
+}
+
+function updateProfile($conn, $email, $bio, $picture, $backgroundImageURL, $badgeURL, $premium){
+   $safeBackgroundImageURL = mysqli_real_escape_string($conn, $backgroundImageURL);
+   if($badgeURL != null){
+      $safeBadgeURL = mysqli_real_escape_string($conn, $badgeURL);
+   }
+
    if($premium){
-      $sqlUpdatePremium = "UPDATE premium SET BadgeURL='$safeBadgeURL',BackgroundURL='$safeBackgroundImageURL' WHERE Email='$email'";
+      $sqlUpdatePremium = "UPDATE premium SET BackgroundURL='$backgroundImageURL' WHERE Email='$email'";
+
+      if($badgeURL != null){
+         $sqlUpdatePremium = "UPDATE premium SET BadgeURL='$safeBadgeURL',BackgroundURL='$backgroundImageURL' WHERE Email='$email'";
+      }
+
+
       if(mysqli_query($conn, $sqlUpdatePremium)){
          $_SESSION['bg-image'] = $safeBackgroundImageURL;
-         
-         header('Location: index.php');
-         exit();
       }
    }
+
    $username = getUsernameFromUsersTable($conn, $email);
-   $bio = $dataArray['Bio'];
+
    $safeBio = mysqli_real_escape_string($conn, $bio);
 
-   $picture = $dataArray['Picture'];
    $safePicture = mysqli_real_escape_string($conn, $picture);
 
    $sqlUpdateProfile = "UPDATE profile SET Bio='$safeBio', Picture='$safePicture' WHERE Username='$username'";
@@ -423,10 +498,11 @@ function updateProfile($conn, $email, $dataArray, $backgroundImageURL, $badgeURL
    exit();
 }
 
-function getProfileData($conn, $email){
+function getProfileData($conn, $username){
+   $email = getEmailFromUsersTable($conn, $username);
    $badgeData = array();
    $profileData = array();
-   //$sqlSelectInnerJoin = "SELECT profile.Username, profile.Bio, profile.Picture FROM profile INNER JOIN users ON profile.Username = users.Username WHERE users.Email='$email'";
+   //$sqlSelectSubQuery = "SELECT profile.Username, profile.Bio, profile.Picture FROM profile INNER JOIN users ON profile.Username = users.Username WHERE users.Email='$email'";
    
    //returns username, bio, picture from profile where username is in the subquery, acts like an inner join
    $sqlSelectSubQuery = "SELECT Username, Bio, Picture FROM profile WHERE Username IN (SELECT Username FROM users WHERE Email = '$email')";
@@ -438,17 +514,20 @@ function getProfileData($conn, $email){
    $resultSubQuery = mysqli_query($conn, $sqlSelectSubQuery);
    $profileData = mysqli_fetch_array($resultSubQuery, MYSQLI_ASSOC);
    
+   if($profileData == null){
+      return array();
+   }
    return array_merge($badgeData, $profileData);   
 
 }
 
-function searchUser($conn, $username){
-   $safeUsername = mysqli_real_escape_string($conn, $username);
-   $sqlSelectProfile = "SELECT Username,Bio,Picture FROM profile WHERE Username='$safeUsername'";
-   $result = mysqli_query($conn, $sqlSelectProfile);
+// function searchUser($conn, $username){
+//    $safeUsername = mysqli_real_escape_string($conn, $username);
+//    $sqlSelectProfile = "SELECT Username,Bio,Picture FROM profile WHERE Username='$safeUsername'";
+//    $result = mysqli_query($conn, $sqlSelectProfile);
    
-   return mysqli_fetch_array($result, MYSQLI_ASSOC);
-}
+//    return mysqli_fetch_array($result, MYSQLI_ASSOC);
+// }
 
 //=================================================================================================================================================================
 //PREMIUM USER OPERATIONS:
@@ -555,18 +634,22 @@ function checkStandardPrivatePosts($conn, $email){
 
 function checkStandardBooksLimit($conn, $email){
    $sqlSelectStandard = "SELECT BooksLimit FROM standard WHERE Email='$email'";
-   $resultSelect = mysqli_query($conn, $sqlSelectStandard);
-   $selectArray = mysqli_fetch_array($resultSelect, MYSQLI_ASSOC);
-   
+   if($resultSelect = mysqli_query($conn, $sqlSelectStandard)){
+      $selectArray = mysqli_fetch_array($resultSelect, MYSQLI_ASSOC);
+   }else {
+      errorRedirect("/books/index.php");
+   }
+
+
    return ((int) $selectArray['BooksLimit'] != 0);
 }
 
 //=================================================================================================================================================================
 //ERROR HANDLING
 
-function errorRedirect(){
+function errorRedirect($redirectPage){
    $_SESSION['errmessage'] = 'Error description: ' . mysqli_error($conn);
-   header('Location: /index.php');
+   header('Location: ' . $redirectPage);
 }
 
 

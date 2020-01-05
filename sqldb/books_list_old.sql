@@ -75,14 +75,6 @@ CREATE TABLE standard (
   CHECK (PrivatePosts BETWEEN 0 and 2)
 );
 
-CREATE TABLE favourites (
-  Email varchar(255) NOT NULL,
-  ReviewID int NOT NULL,
-  PRIMARY KEY(Email, ReviewID),
-  FOREIGN KEY (Email) REFERENCES users(Email),
-  FOREIGN KEY (ReviewID) REFERENCES reviews(ID)
-);
-
 ALTER TABLE users_reviews ADD FOREIGN KEY (Email) REFERENCES users (Email);
 
 ALTER TABLE users_reviews ADD FOREIGN KEY (ReviewID) REFERENCES reviews (ID);

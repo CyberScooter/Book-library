@@ -59,7 +59,6 @@ if(isset($_POST['submit'])){
             <input type="checkbox" name="visibility" value="visible" <?php echo ($bookReviewData['Visible']) ? 'checked' : null ?>> Public </input>
             <input type="hidden" name="previousVisiblity" value="<?php echo ($bookReviewData['Visible']) ? 'visible' : null ?>" >
 
-            <input class="TextBox" type="file" name="fileinput"/>
             <?php if($showReviewInputs){ ?>
             <input class="TextBox" type="text" value="<?php echo $bookReviewData['Review'] ?>" placeholder="Enter review" name="review">
             <input class="TextBox" type="text" value="<?php echo $bookReviewData['Rating'] ?>" placeholder="Enter rating" name="rating">

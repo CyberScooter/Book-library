@@ -34,6 +34,11 @@ if(isset($_POST['deleteBook'])){
     header('Location: index.php');
 }
 
+if(isset($_POST['favouriteBook'])){
+    addBookToFavourite($conn, $_SESSION['User'], $_POST['ReviewID']);
+    header('Location: favourites.php');
+}
+
 if(isset($_POST['addComment'])){
     $id = $_POST['id'];
     $comment = htmlspecialchars($_POST['comment']);
@@ -101,13 +106,18 @@ if(isset($_SESSION['errmessage'])){
                     <p><span class="Attributes">Rating:</span> <?php echo $booksData[$i]['Rating']?></p>
                 <?php } ?>
 
-                <?php if(!isset($_GET['user'])){ ?>
-                    <a class="Button" href="/books/edit.php?id=<?php echo $booksData[$i]['ID'] ?>"> Update Book details</a>
+                <a class="Button" href="/books/edit.php?id=<?php echo $booksData[$i]['ID'] ?>"> Update Book details</a>
+                <form action="index.php" method="post">
+                    <input class="Button" type="submit" name="deleteBook" value="Delete Book">
+                    <input type="hidden" name="deleteISBN" value="<?php echo $booksData[$i]['ISBN'] ?>">
+                    <input type="hidden" name="deleteReviewID" value="<?php echo $booksData[$i]['ReviewID'] ?>">
+                    <input type="hidden" name="deleteAuthor" value="<?php echo $booksData[$i]['Author'] ?>">
+                </form>
+
+                <?php if(!checkFavouriteBook($conn, $_SESSION['User'], $booksData[$i]['ReviewID'])) {?>
                     <form action="index.php" method="post">
-                        <input class="Button" type="submit" name="deleteBook" value="Delete Book">
-                        <input type="hidden" name="deleteISBN" value="<?php echo $booksData[$i]['ISBN'] ?>">
-                        <input type="hidden" name="deleteReviewID" value="<?php echo $booksData[$i]['ReviewID'] ?>">
-                        <input type="hidden" name="deleteAuthor" value="<?php echo $booksData[$i]['Author'] ?>">
+                        <input class="Button" type="submit" name="favouriteBook" value="Add book to favourite">
+                        <input type="hidden" name="ReviewID" value="<?php echo $booksData[$i]['ReviewID'] ?>">
                     </form>
                 <?php } ?>
 
