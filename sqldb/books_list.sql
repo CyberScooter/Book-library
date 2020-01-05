@@ -17,7 +17,8 @@ CREATE TABLE reviews (
   ISBN varchar(255) NOT NULL,
   Review varchar(255),
   Rating int DEFAULT 0,
-  Visible boolean
+  Visible boolean,
+  CHECK (Rating BETWEEN 0 and 10)
 );
 
 CREATE TABLE profile (
@@ -69,8 +70,9 @@ CREATE TABLE premium (
 CREATE TABLE standard (
   Email varchar(255) NOT NULL,
   BooksLimit int NOT NULL,
-  PrivatePosts int NOT NULL
-
+  PrivatePosts int NOT NULL,
+  CHECK (BooksLimit BETWEEN 0 and 5),
+  CHECK (PrivatePosts BETWEEN 0 and 2)
 );
 
 ALTER TABLE users_reviews ADD FOREIGN KEY (Email) REFERENCES users (Email);

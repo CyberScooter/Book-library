@@ -13,8 +13,29 @@
         $description = htmlspecialchars($_POST['description']);
         $author = htmlspecialchars($_POST['author']);
         $authorDOB = htmlspecialchars($_POST['authorDOB']);
+
+        $authorDOBSplit = explode('-', $authorDOB);
+        $releaseDateSplit = explode('-', $releaseDate);
+        $checkDateAuthor = checkdate($authorDOBSplit[1], $authorDOBSplit[0], $authorDOBSplit[2]);
+        $checkDateReleaseDate = checkdate($releaseDateSplit[1], $releaseDateSplit[0], $releaseDateSplit[2]);
+
+        if(sizeof($authorDOBSplit) != 3 || sizeof($releaseDateSplit) != 3 || !$checkDateAuthor || !$checkDateReleaseDate){
+            $_SESSION['errmessage'] = "Date is invalid";
+            header('Location: add.php');
+            exit();
+
+        }
+
+        $sqlAuthorDOB = date("Y-m-d",strtotime($authorDOB));
+        $sqlReleaseDate = date("Y-m-d",strtotime($releaseDate));
+
         $totalPages = htmlspecialchars($_POST['totalPages']);
         $pagesRead = htmlspecialchars($_POST['pagesRead']);
+        if(!is_numeric($pagesRead) || !is_numeric($totalPages)){
+            $_SESSION['errmessage'] = "Pages inputs are not numbers";
+            header('Location: add.php');
+            exit();
+        }
         $picture = htmlspecialchars($_POST['fileinput']);
         $badge = null;
         $review = NULL;
@@ -34,12 +55,21 @@
                 !$visible ? decrementPrivatePostReviews($conn, $_SESSION['User']) : NULL;
                 decrementStandardLimitReviews($conn, $_SESSION['User']);
             }
-            saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating, $picture, $visible);
+            saveBookReview($conn, $email, $isbn, $title, $sqlReleaseDate, $description, $author, $sqlAuthorDOB, $totalPages, $pagesRead, $review, $rating, $picture, $visible);
             header('Location: /books/index.php');
             exit();
         }
 
     }
+
+    global $error;
+    if(isset($_SESSION['errmessage'])){
+        $error = $_SESSION['errmessage'];
+        unset($_SESSION['errmessage']);
+    }
+
+
+
 ?>
 
 
@@ -48,13 +78,14 @@
 <body>
 
     <?php if(isset($_SESSION['User'])){ ?>
+        <h1 class="error"><?php echo $error?></h1>
         <form action="add.php" method="POST">
             <input class="TextBox" type="text" placeholder="Enter Book ISBN" name="isbn">
             <input class="TextBox" type="text" placeholder="Enter Book Title" name="title">
-            <input class="TextBox" type="text" placeholder="Enter Book release date in (yyyy-mm-dd) format" name="releasedDate">
+            <input class="TextBox" type="text" placeholder="Enter Book release date in (dd-mm-yyyy) format" name="releasedDate">
             <input class="TextBox" type="text" placeholder="Enter Book description" name="description">
             <input class="TextBox" type="text" placeholder="Enter author" name="author">
-            <input class="TextBox" type="text" placeholder="Enter author DOB in (yyyy-mm-dd) format" name="authorDOB">
+            <input class="TextBox" type="text" placeholder="Enter author DOB in (dd-mm-yyyy) format" name="authorDOB">
             <input class="TextBox" type="text" placeholder="Enter total pages" name="totalPages">
             <input class="TextBox" type="text" placeholder="Enter pages read" name="pagesRead">
             <input type="checkbox" name="visibility" value="visible" checked>Public</input>

@@ -110,19 +110,15 @@ function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description
    $safeTotalPages = mysqli_real_escape_string($conn, $totalPages);
    $safePagesRead = mysqli_real_escape_string($conn, $pagesRead);
    $safeReview = mysqli_real_escape_string($conn, $review);
-   
-   $releaseDateSQL=date("Y-m-d",strtotime($safeReleaseDate));
-   $authorDOBSQL=date("Y-m-d",strtotime($safeAuthorDOB));
-
    $safeAuthor = mysqli_real_escape_string($conn, $author);
 
    if(!checkExistingAuthor($conn, $email, $safeAuthor)){
-      $sqlInsertAuthor = "INSERT INTO author(Name, DOB) VALUES('$safeAuthor', '$authorDOBSQL')";
+      $sqlInsertAuthor = "INSERT INTO author(Name, DOB) VALUES('$safeAuthor', '$authorDOB')";
       mysqli_query($conn, $sqlInsertAuthor);
    }
 
    if(!checkExistingBook($conn, $email, $safeISBN)){
-      $sqlInsertBook = "INSERT INTO books(ISBN, Author, Title, DateReleased, Description, Picture) VALUES('$safeISBN','$safeAuthor','$safeTitle','$releaseDateSQL','$safeDescription','$safePicture')";
+      $sqlInsertBook = "INSERT INTO books(ISBN, Author, Title, DateReleased, Description, Picture) VALUES('$safeISBN','$safeAuthor','$safeTitle','$releaseDate','$safeDescription','$safePicture')";
       mysqli_query($conn, $sqlInsertBook);
    }
 

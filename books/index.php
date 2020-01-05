@@ -78,7 +78,7 @@ if(isset($_SESSION['errmessage'])){
 
 <?php if(isset($_SESSION['User'])){ ?>
     <h1 class="error"><?php echo $error ?></h1>
-    <?php echo (checkStandardBooksLimit($conn, $_SESSION['User']) || checkIfPremiumUser($conn, $_SESSION['User'])) ? '<a class="AddButton" href="../book/add.php"> Add Book </a>' : NULL ?>
+    <?php echo (checkStandardBooksLimit($conn, $_SESSION['User']) || checkIfPremiumUser($conn, $_SESSION['User'])) ? '<a class="AddButton" href="../books/add.php"> Add Book </a>' : NULL ?>
     <?php if($booksData != null){ ?>
 
         <?php foreach($booksData as $i => $item){ ?>
