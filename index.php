@@ -7,7 +7,7 @@
     //When the logout button is pressed it unset session variables
     if(isset($_GET['logout'])){
         unset($_SESSION['User']);
-        unset($_SESSION['bg']);
+        unset($_SESSION['bg-image']);
         header('Location: index.php');
     }
 
@@ -18,11 +18,8 @@
 
     //User SESSION stores the email of the user
     if(isset($_SESSION['User'])){
-        if(checkIfPremiumUser($conn, $_SESSION['User']) && !isset($_SESSION['bg'])){
+        if(checkIfPremiumUser($conn, $_SESSION['User']) && !isset($_SESSION['bg-image'])){
             setBackground($conn, $_SESSION['User']);
-        }
-        if(checkIfStandardUser($conn, $_SESSION['User'])){
-            $_SESSION['bg'] = "#DCDCD";
         }
         $username = getUsernameFromUsersTable($conn, $_SESSION['User']);
     }

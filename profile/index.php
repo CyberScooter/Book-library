@@ -92,12 +92,19 @@ if(isset($_SESSION['errmessage'])){
         <input class="Search" type="submit" value="Search"> 
     </form>
 
+    <!-- 'profileData' variable stores the data collected from database to be displayed on profile -->
     <?php if($profileData != null) { ?>
 
         <!-- Displays specific data based on whether the user is on their own profile or someone else's -->
+
         <hr> 
         <h1><?php echo (isset($_GET['user']) ? 'User: ' : 'Welcome ')?> <?php echo $profileData['Username'] ?> </h1>
-        <?php if(checkIfPremiumUser($conn, $_SESSION['User'])) { ?>
+        <!-- If user is own their own profile and is premium then display their own badge -->
+        <?php if(checkIfPremiumUser($conn, $_SESSION['User']) && !isset($_GET['user'])) { ?>
+            <img width="50px" height="50px" src="<?php echo ($profileData['BadgeURL'] != null) ? "/resources/badges/".$profileData['BadgeURL'] : "" ?>" alt="No badge added, try adding one" />
+        <?php } ?>
+        <!-- If user is on another person's profile and the other person is premium then display their badge-->
+        <?php if(isset($_GET['user']) && checkIfPremiumUser($conn, getEmailFromUsersTable($conn, $_GET['user']))) {?>
             <img width="50px" height="50px" src="<?php echo ($profileData['BadgeURL'] != null) ? "/resources/badges/".$profileData['BadgeURL'] : "" ?>" alt="No badge added, try adding one" />
         <?php } ?>
 
@@ -108,8 +115,9 @@ if(isset($_SESSION['errmessage'])){
 
     <h2><?php echo (isset($_GET['user']) && $profileData == null) ? 'User does not exist' : ' ' ?> </h2>
 
-
     <p><?php echo (isset($_GET['user'])) ? '<a class="Button" href="index.php"> Return to my profile </a>' : '<a class="Button" href="edit.php"> Edit profile </a>' ?></p>
+
+    <!-- Display premium button if user is on their own profile -->
     <?php if($premiumButton && !isset($_GET['user'])){ ?>
         <form action="index.php" method="post"> 
             <input type="submit" class="Button" value="Upgrade to premium" />
@@ -124,16 +132,18 @@ if(isset($_SESSION['errmessage'])){
         <hr>
         <h2 style="font-size:2rem"> Books: </h2>
 
-        <!-- This loops through each review made by a user and the index of each one is referenced by the index location '$i' -->
+        <!-- This loops through each review made by a user and the review of each one is referenced by the index location '$i' -->
         <?php   foreach($booksData as $i => $item){ ?>
         
-            <!-- CSS properties used to make it easier to visualise and see the data on the web page  -->
             <div class="BookReview">
 
-            <!-- This if statement below determines access privileges to view the books displayed on the page -->
-            <!-- Certain constraints need to be made for instance if there was a the case if a user makes their book private it should not be seen by anyone else except themselves -->
-            <!-- The first part of the if statement makes sure that the book is visible and the user is on their own profile -->
-            <!-- The second part of the if statement makes sure that the if the book is on private and the user is on their own profile then the book should be seen as it is their own -->
+            <!-- This if statement below determines access privileges to view the books displayed on the page 
+                Certain constraints need to be made for instance if there was a the case that a user makes their book private it should not be seen by anyone else except themselves 
+                The first part of the if statement makes sure that the book is visible and the user is on their own profile 
+                The second part of the if statement makes sure that the if the book is on private and the user is on their own profile then the book should be seen as it is their own 
+
+                If current user uses to find their own books using this page then it should display the books as someone else viewing their profile 
+            -->
 
             <?php if(($booksData[$i]['Visible'] && isset($_GET['user'])) || ($booksData[$i]['Visible'] && !isset($_GET['user'])) || (!$booksData[$i]['Visible'] && !isset($_GET['user']))  ){ ?>
                 
@@ -179,7 +189,7 @@ if(isset($_SESSION['errmessage'])){
                 <!--
                     An appropriate function from the db_operations.php file is called that selects all the required comments data for each review
                     so that it can be displayed onto the web page.
-                    An if statement is added inside the block of code below to determine if the comment belongs to the user, if so then delete option can be added
+                    An if statement is added inside the block of code below to determine if the comment belongs to the user, if so then delete form can be added
                 -->
                 <?php list($comments, $commentsDateCreated, $user, $commentId) = selectCommentsFromReview($conn, $booksData[$i]['ReviewID']);?>
                 <?php for($j = 0; $j < count($comments); $j++){?>
