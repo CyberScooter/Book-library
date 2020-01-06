@@ -13,10 +13,10 @@
             margin: 0;
             /* PREMIUM USERS FEATURE */
             /* If bg-image session is set then set the background-image css property to the image set in the session */
-            background-image: url("<?php echo (isset($_SESSION['bg-image'])) ? $_SESSION['bg-image'] : null ?>");
+            background-image: url("<?php echo $_SESSION['bg']?>");
             /* STANDARD USERS FEATURE */
             /* Else if it is a standard account then just set 'background'color' to some grey colour */
-            background-color: <?php echo (!isset($_SESSION['bg-image'])) ? '#DCDCDC;' : NULL;?>
+            background-color: <?php echo $_SESSION['bg']?>
             background-repeat: no-repeat;
             background-attachment: fixed;
         }

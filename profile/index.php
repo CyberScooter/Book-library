@@ -98,7 +98,7 @@ if(isset($_SESSION['errmessage'])){
         <hr> 
         <h1><?php echo (isset($_GET['user']) ? 'User: ' : 'Welcome ')?> <?php echo $profileData['Username'] ?> </h1>
         <?php if(checkIfPremiumUser($conn, $_SESSION['User'])) { ?>
-            <img width="50px" height="50px" src="<?php echo ($profileData['BadgeURL'] != null) ? "/resources/badges/".$profileData['BadgeURL'] : "" ?>" />
+            <img width="50px" height="50px" src="<?php echo ($profileData['BadgeURL'] != null) ? "/resources/badges/".$profileData['BadgeURL'] : "" ?>" alt="No badge added, try adding one" />
         <?php } ?>
 
         <h2> Bio: <?php echo ($profileData['Bio'] == null) ? ((isset($_GET['user'])) ? 'Nothing to show' : 'No bio added, try adding one') : $profileData['Bio'] ?> </h2>

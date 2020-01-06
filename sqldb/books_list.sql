@@ -1,3 +1,7 @@
+
+CREATE DATABASE books_list;
+USE books_list;
+
 CREATE TABLE users (
   Email varchar(255) PRIMARY KEY,
   Username varchar(255) NOT NULL,

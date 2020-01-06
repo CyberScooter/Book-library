@@ -477,7 +477,7 @@ function updateProfile($conn, $email, $bio, $picture, $backgroundImageURL, $badg
 
 
       if(mysqli_query($conn, $sqlUpdatePremium)){
-         $_SESSION['bg-image'] = $safeBackgroundImageURL;
+         $_SESSION['bg'] = $safeBackgroundImageURL;
       }
    }
 
@@ -554,7 +554,7 @@ function setBackground($conn, $email){
    $sqlSelectBackground = "SELECT BackgroundURL FROM premium WHERE Email='$email'";
    if($result = mysqli_query($conn, $sqlSelectBackground)){
       $backgroundArray = mysqli_fetch_array($result, MYSQLI_ASSOC);
-      $_SESSION['bg-image'] = $backgroundArray['BackgroundURL'];
+      $_SESSION['bg'] = $backgroundArray['BackgroundURL'];
    }
 }
 
