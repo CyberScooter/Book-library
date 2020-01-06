@@ -96,6 +96,8 @@ if(isset($_SESSION['errmessage'])){
     <?php if($profileData != null) { ?>
 
         <!-- Displays specific data based on whether the user is on their own profile or someone else's -->
+        
+        <!-- @GetImageSize causes a delay when updating images because it is opening up the image beforehand to make sure it is an image -->
 
         <hr> 
         <h1><?php echo (isset($_GET['user']) ? 'User: ' : 'Welcome ')?> <?php echo $profileData['Username'] ?> </h1>
@@ -105,11 +107,11 @@ if(isset($_SESSION['errmessage'])){
         <?php } ?>
         <!-- If user is on another person's profile and the other person is premium then display their badge-->
         <?php if(isset($_GET['user']) && checkIfPremiumUser($conn, getEmailFromUsersTable($conn, $_GET['user']))) {?>
-            <img width="50px" height="50px" src="<?php echo ($profileData['BadgeURL'] != null) ? "/resources/badges/".$profileData['BadgeURL'] : "" ?>" alt="No badge added, try adding one" />
+            <img width="50px" height="50px" src="<?php echo (@GetImageSize($profileData['BadgeURL'])) ? "/resources/badges/".$profileData['BadgeURL'] : "" ?>" alt="No badge added, try adding one" />
         <?php } ?>
 
         <h2> Bio: <?php echo ($profileData['Bio'] == null) ? ((isset($_GET['user'])) ? 'Nothing to show' : 'No bio added, try adding one') : $profileData['Bio'] ?> </h2>
-        <div class="Picture"><img class="ProfilePicture" src="<?php echo (@fopen($profileData['Picture'], 'r')) ? $profileData['Picture'] : '/resources/pixabay-pp.png' ?>"/></div>
+        <div class="Picture"><img class="ProfilePicture" src="<?php echo (@GetImageSize($profileData['Picture'])) ? $profileData['Picture'] : '/resources/pixabay-pp.png' ?>"/></div>
 
     <?php } ?>
 

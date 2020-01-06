@@ -16,6 +16,13 @@ if(isset($_SESSION['User'])){
         if($premium){
             $backgroundImage = htmlspecialchars($_POST['bgImage']);
             $badge = htmlspecialchars($_POST['badge']);
+            //Delay in changing picture because it is making sure url is image
+            if(!@GetImageSize($backgroundImage)){
+                $backgroundImage = null;
+            }
+            if(!@GetImageSize($badge)){
+                $badge = null;
+            }
         }
         updateProfile($conn, $_SESSION['User'], $bio, $picture, $backgroundImage, $badge, $premium);
     }
@@ -28,6 +35,7 @@ if(isset($_SESSION['User'])){
 <?php if(isset($_SESSION['User'])) { ?>
 
     <h1> Update Profile </h1>
+    <h3> There will be a short delay after update button is pressed </h3>
     
     <form action="edit.php" method="POST">
         <input class="TextBox" type="text" placeholder="Enter new bio" name="bio" value="<?php echo $profileData['Bio'] ?>" >
