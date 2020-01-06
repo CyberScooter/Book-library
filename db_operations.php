@@ -50,7 +50,7 @@ function registerUser($conn, $email, $password, $passwordConfirmation, $username
 }
 
 function insertStandardUser($conn, $email){
-   $sqlInsertStandard = "INSERT INTO standard(Email, BooksLimit, PrivatePosts) VALUES('$email', 5, 2)";
+   $sqlInsertStandard = "INSERT INTO standard(Email) VALUES('$email')";
    if(!$result = mysqli_query($conn, $sqlInsertStandard)){
       sqlError($conn);
    }
@@ -373,6 +373,13 @@ function deleteUserBookReview($conn, $email, $id, $isbn, $author){
             
          }
 
+         if(checkFavouriteBook($conn, $email, $id)){
+            $sqlDeleteFavourites = "DELETE FROM favourites WHERE Email='$email' AND ReviewID='$id'";
+            if(!mysqli_query($conn, $sqlDeleteFavourites)){
+               sqlError($conn);
+            }
+         }
+
          $sqlDeleteUsersReviewsID = "DELETE FROM users_reviews WHERE ID='$userBooksID'";
          if(!mysqli_query($conn, $sqlDeleteUsersReviewsID)){
             sqlError($conn);
@@ -386,13 +393,6 @@ function deleteUserBookReview($conn, $email, $id, $isbn, $author){
          $sqlDeletePagesID = "DELETE FROM pages WHERE ID='$pagesID'";
          if(!mysqli_query($conn, $sqlDeletePagesID)){
             sqlError($conn);
-         }
-
-         if(checkFavouriteBook($conn, $email, $id)){
-            $sqlDeleteFavourites = "DELETE FROM favourites WHERE Email='$email' AND ReviewID='$id'";
-            if(!mysqli_query($conn, $sqlDeleteFavourites)){
-               sqlError($conn);
-            }
          }
 
       }else{
@@ -432,7 +432,7 @@ function deleteUserBookReview($conn, $email, $id, $isbn, $author){
 
       $reviewArray = mysqli_fetch_array($result, MYSQLI_ASSOC);
       if(checkIfStandardUser($conn, $email) && !$reviewArray['visible']){
-         incrementPrivatePostReviews($conn, $email);
+         incrementPrivateReviews($conn, $email);
       }
 
       if(checkIfStandardUser($conn, $email)){
@@ -802,40 +802,40 @@ function decrementStandardLimitReviews($conn, $email){
 }
 
 /**
- * Two functions below keep track of the standard account private posts limit
- * They increment and decrement the value of PrivatePosts
+ * Two functions below keep track of the standard account private reviews limit
+ * They increment and decrement the value of PrivateReviews
  */
 
-function decrementPrivatePostReviews($conn, $email){
-   $sqlSelectStandard = "SELECT PrivatePosts FROM standard WHERE Email='$email'";
+function decrementPrivateReviews($conn, $email){
+   $sqlSelectStandard = "SELECT PrivateReviews FROM standard WHERE Email='$email'";
    if($resultSelect = mysqli_query($conn, $sqlSelectStandard)){
       $selectArray = mysqli_fetch_array($resultSelect, MYSQLI_ASSOC);
    }else{
       sqlError($conn);
    }
-   $privatePosts = (int) $selectArray['PrivatePosts'] - 1;
-   if($privatePosts >= 0){
-      $sqlUpdateStandard = "UPDATE standard SET PrivatePosts='$privatePosts' WHERE Email = '$email'";
+   $privateReviews = (int) $selectArray['PrivateReviews'] - 1;
+   if($privateReviews >= 0){
+      $sqlUpdateStandard = "UPDATE standard SET PrivateReviews='$privateReviews' WHERE Email = '$email'";
       if(!$resultUpdate = mysqli_query($conn, $sqlUpdateStandard)){
          sqlError($conn);
       }
    }else{
-      $_SESSION['errmessage'] = "Private posts limit reached";
+      $_SESSION['errmessage'] = "Private reviews limit reached";
       header('Location: /profile/index.php');
       exit();   
    }
 }
 
-function incrementPrivatePostReviews($conn, $email){
-   $sqlSelectStandard = "SELECT PrivatePosts FROM standard WHERE Email='$email'";
+function incrementPrivateReviews($conn, $email){
+   $sqlSelectStandard = "SELECT PrivateReviews FROM standard WHERE Email='$email'";
    if($resultSelect = mysqli_query($conn, $sqlSelectStandard)){
       $selectArray = mysqli_fetch_array($resultSelect, MYSQLI_ASSOC);
    }else{
       sqlError($conn);
    }
 
-   $privatePosts = (int) $selectArray['PrivatePosts'] + 1;
-   $sqlUpdateStandard = "UPDATE standard SET PrivatePosts='$privatePosts' WHERE Email = '$email'";
+   $privateReviews = (int) $selectArray['PrivateReviews'] + 1;
+   $sqlUpdateStandard = "UPDATE standard SET PrivateReviews='$privateReviews' WHERE Email = '$email'";
    if(!$resultUpdate = mysqli_query($conn, $sqlUpdateStandard)){
       sqlError($conn);
    }

@@ -42,6 +42,9 @@ if(isset($_POST['deleteFavourite'])){
                     <input type="hidden" name="deleteReviewID" value="<?php echo $booksData[$i]['ReviewID'] ?>">
                 </form>
             </div>
+
+            <hr>
+            
         <?php } ?>
 
     <?php } else { ?>

@@ -28,9 +28,9 @@ if(isset($_POST['submit'])){
         if(checkIfStandardUser($conn, $_SESSION['User'])){
             $previousVisibility = $_POST['previousVisibility'] == 'visible' ? true : false;
             if(!$visible){
-                decrementPrivatePostReviews($conn, $_SESSION['User']);
+                decrementPrivateReviews($conn, $_SESSION['User']);
             }else if(!$previousVisibility && $visible){
-                incrementPrivatePostReviews($conn, $_SESSION['User']);
+                incrementPrivateReviews($conn, $_SESSION['User']);
             }
         }
         ($rating > 10 || $rating < 0)? $_SESSION['errmessage'] = "Invalid rating please retry, rating should be between 0-10": $bookReviewData = updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, $visible);

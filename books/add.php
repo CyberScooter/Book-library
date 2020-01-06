@@ -52,7 +52,7 @@
         if($pagesRead <= $totalPages && $email != null && $isbn != null && $title != null && $releaseDate && $description != null && $author != null && $authorDOB != null && $totalPages != null && $pagesRead != null){
 
             if(checkIfStandardUser($conn, $_SESSION['User'])){
-                !$visible ? decrementPrivatePostReviews($conn, $_SESSION['User']) : NULL;
+                !$visible ? decrementPrivateReviews($conn, $_SESSION['User']) : NULL;
                 decrementStandardLimitReviews($conn, $_SESSION['User']);
             }
             saveBookReview($conn, $email, $isbn, $title, $sqlReleaseDate, $description, $author, $sqlAuthorDOB, $totalPages, $pagesRead, $review, $rating, $picture, $visible);
