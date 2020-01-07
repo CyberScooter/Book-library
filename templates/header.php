@@ -51,4 +51,3 @@
 
     </ul>
 
-    <div class="container">

@@ -31,19 +31,22 @@ if(isset($_POST['registerStandard'])){
  * then set the 'error' variable to be rendered in html to the error message
  * finally unset/clear the session variable for the error so that it doesnt display error after refresh
  */
-global $error;
-if(isset($_SESSION['errmessage'])){
+global $error; 
+if(isset($_SESSION['errmessage'])){ 
     $error = $_SESSION['errmessage'];
-}
-unset($_SESSION['errmessage']);
+    unset($_SESSION['errmessage']); 
+} 
 
 ?>
 
 <?php include './templates/header.php'; ?>
 
+<h1 class="error"><?php echo $error?></h1>
+
+<div class="container">
+
 <?php if(!isset($_SESSION['User'])){ ?>
 
-    <p class="error"><?php echo $error ?></p>
     <form action="register.php" method="POST">
         <input class="TextBox" type="text" name="username" placeholder="Enter username">
         <input class="TextBox" type="text" name="email" placeholder="Enter email address">

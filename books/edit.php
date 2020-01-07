@@ -33,15 +33,38 @@ if(isset($_POST['submit'])){
                 incrementPrivateReviews($conn, $_SESSION['User']);
             }
         }
-        ($rating > 10 || $rating < 0)? $_SESSION['errmessage'] = "Invalid rating please retry, rating should be between 0-10": $bookReviewData = updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, $visible);
+        if($rating > 10 || $rating < 0){
+            $_SESSION['errmessage'] = "Invalid rating please try, rating should be between 0-10";
+            header('Location: edit.php');
+            exit();
+        }else{
+            $bookReviewData = updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, $visible);
+            header('Location: /books/index.php');
+        }
     }
-    header('Location: /books/index.php');
-    
 }
+
+global $error; 
+if(isset($_SESSION['errmessage'])){ 
+    $error = $_SESSION['errmessage'];
+    unset($_SESSION['errmessage']); 
+} 
+
+global $success; 
+if(isset($_SESSION['successmessage'])){ 
+    $success = $_SESSION['successmessage']; 
+    unset($_SESSION['successmessage']); 
+}
+
 
 ?>
 
 <?php include '../templates/header.php'; ?>
+
+<h1 class="error"><?php echo $error?></h1>
+<h1 class="success"><?php echo $success?></h1>
+
+<div class="container">
 
 <body>
 

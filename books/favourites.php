@@ -11,15 +11,34 @@ if(isset($_SESSION['User'])){
 
 if(isset($_POST['deleteFavourite'])){
     deleteFromFavourites($conn, $_SESSION['User'], $_POST['deleteReviewID']);
+    $_SESSION['successmessage'] = "Successfully removed book review from favourites";
     header('Location: favourites.php');
     exit();
+}
+
+global $error; 
+if(isset($_SESSION['errmessage'])){ 
+    $error = $_SESSION['errmessage'];
+    unset($_SESSION['errmessage']); 
+} 
+
+global $success; 
+if(isset($_SESSION['successmessage'])){ 
+    $success = $_SESSION['successmessage']; 
+    unset($_SESSION['successmessage']); 
 }
 
 ?>
 
 <?php include '../templates/header.php'; ?>
 
+<h1 class="error"><?php echo $error?></h1>
+<h1 class="success"><?php echo $success?></h1>
+
+<div class="container">
+
 <?php if(isset($_SESSION['User'])){ ?>
+
     <?php if($booksData != null){ ?>
 
         <?php foreach($booksData as $i => $item){ ?>

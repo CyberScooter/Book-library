@@ -19,21 +19,24 @@
     transition: 0.3s;
 }
 
-.Green {
+.success {
   color: green;
+  text-align: center;
 }
 
-.Red {
-  color: red;
+.error{
+  color:red;
+  text-align: center;
 }
 
 .Picture {
-  width: 100px;
+  width: 200px; 
+  
   margin: auto;
 }
 
 .User {
-  font-weight: bold;
+  text-decoration: underline;
 }
 
 .ProfilePicture {
@@ -122,12 +125,6 @@
 
 #FixedTextBox{
   background-color: #ffcccc ;
-}
-
-.error{
-  color:red;
-  font-size: 2rem;
-
 }
 
 .SearchBox{

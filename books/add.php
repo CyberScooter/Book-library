@@ -56,29 +56,38 @@
                 decrementStandardLimitReviews($conn, $_SESSION['User']);
             }
             saveBookReview($conn, $email, $isbn, $title, $sqlReleaseDate, $description, $author, $sqlAuthorDOB, $totalPages, $pagesRead, $review, $rating, $picture, $visible);
+            $_SESSION['successmessage'] = "Book review succesfully added";
             header('Location: /books/index.php');
             exit();
         }
 
     }
-
-    global $error;
-    if(isset($_SESSION['errmessage'])){
+    global $error; 
+    if(isset($_SESSION['errmessage'])){ 
         $error = $_SESSION['errmessage'];
-        unset($_SESSION['errmessage']);
+        unset($_SESSION['errmessage']); 
+    } 
+
+    global $success; 
+    if(isset($_SESSION['successmessage'])){ 
+        $success = $_SESSION['successmessage']; 
+        unset($_SESSION['successmessage']); 
     }
-
-
 
 ?>
 
 
 <?php include '../templates/header.php'; ?>
 
+<h1 class="error"><?php echo $error?></h1>
+<h1 class="success"><?php echo $success?></h1>
+
+<div class="container">
+
 <body>
 
     <?php if(isset($_SESSION['User'])){ ?>
-        <h1 class="error"><?php echo $error?></h1>
+
         <form action="add.php" method="POST">
             <input class="TextBox" type="text" placeholder="Enter Book ISBN" name="isbn">
             <input class="TextBox" type="text" placeholder="Enter Book Title" name="title">

@@ -31,12 +31,16 @@ if(isset($_POST['deleteBook'])){
     $deleteReviewID = $_POST['deleteReviewID'];
     $deleteAuthor = $_POST['deleteAuthor'];
     deleteUserBookReview($conn, $_SESSION['User'], $deleteReviewID, $deleteISBN, $deleteAuthor);
+    $_SESSION['successmessage'] = "Book review successfully removed";
     header('Location: index.php');
+    exit();
 }
 
 if(isset($_POST['favouriteBook'])){
     addBookToFavourite($conn, $_SESSION['User'], $_POST['ReviewID']);
+    $_SESSION['successmessage'] = "Added book review to favourites";
     header('Location: favourites.php');
+    exit();
 }
 
 if(isset($_POST['addComment'])){
@@ -62,27 +66,39 @@ if(isset($_POST['deleteComment'])){
 
     //Handles redirection, if POST variable below is not null then it redirects to other users website
     //else their own. This is determined via the hidden input in the form below
+    $_SESSION['successmessage'] = "Comment successfully removed";
     if($_POST['user'] != null){
         header('Location: ?user=' . $_POST['user']);
+        exit();
     }else{
         header('Location: index.php');
+        exit();
     }
 
 }
-//Error handling
-global $error;
-if(isset($_SESSION['errmessage'])){
-    $error = $_SESSION['errmessage'];
-    unset($_SESSION['errmessage']);
-}
 
+global $error; 
+if(isset($_SESSION['errmessage'])){ 
+    $error = $_SESSION['errmessage'];
+    unset($_SESSION['errmessage']); 
+} 
+
+global $success; 
+if(isset($_SESSION['successmessage'])){ 
+    $success = $_SESSION['successmessage']; 
+    unset($_SESSION['successmessage']); 
+}
 
 ?>
 
 <?php include '../templates/header.php'; ?>
 
+<h1 class="error"><?php echo $error?></h1>
+<h1 class="success"><?php echo $success?></h1>
+
+<div class="container">
+
 <?php if(isset($_SESSION['User'])){ ?>
-    <h1 class="error"><?php echo $error ?></h1>
     <?php echo (checkStandardBooksLimit($conn, $_SESSION['User']) || checkIfPremiumUser($conn, $_SESSION['User'])) ? '<a class="AddButton" href="../books/add.php"> Add Book </a>' : NULL ?>
     <?php if($booksData != null){ ?>
 

@@ -16,8 +16,8 @@ function registerUser($conn, $email, $password, $passwordConfirmation, $username
    $safeEmail = mysqli_real_escape_string($conn, $email);
    $safeUsername = mysqli_real_escape_string($conn, $username);
    if($password == $passwordConfirmation){            
-      //Sql code below selects email and username from users If the email matches AND the username doesnt equal the entered username, filters out existing users                                                                          
-      $sqlSelectInnerJoin = "SELECT users.Email, users.Username FROM users INNER JOIN profile ON profile.Username = users.Username WHERE users.Email='$safeEmail' AND profile.Username != '$safeUsername'";
+      //Sql code below selects email and username from users, if the email matches the input OR the username matches the input then select it                                                                       
+      $sqlSelectInnerJoin = "SELECT Email, Username FROM users WHERE Email='$safeEmail' OR Username = '$safeUsername'";
       if(!$result = mysqli_query($conn, $sqlSelectInnerJoin)){
          sqlError($conn);
       }
@@ -197,8 +197,7 @@ function getAllUserBookReviews($conn, $username){
    $safeUsername = mysqli_real_escape_string($conn, $username);
    $booksData = array();
 
-   $sqlSelectUsersReviews = "SELECT users_reviews.ID, users_reviews.ReviewID, users_reviews.Email, users_reviews.PageID, users_reviews.created_at FROM users INNER JOIN users_reviews
-                           ON users.Email = users_reviews.Email WHERE users.Username='$safeUsername'";
+   $sqlSelectUsersReviews = "SELECT users_reviews.* FROM users INNER JOIN users_reviews ON users.Email = users_reviews.Email WHERE users.Username='$safeUsername'";
    if(!$resultUserReviews = mysqli_query($conn, $sqlSelectUsersReviews)){
       sqlError($conn);
    }
@@ -840,24 +839,6 @@ function incrementPrivateReviews($conn, $email){
       sqlError($conn);
    }
 }
-
-/**
- * functions below check the status of the books reviews
- * so that certain restraints can be applied if it reaches the limit
- */
-
-
-// function checkStandardPrivatePosts($conn, $email){
-//    $sqlSelectStandard = "SELECT PrivatePosts FROM standard WHERE Email='$email'";
-//    if($resultSelect = mysqli_query($conn, $sqlSelectStandard)){
-//       $selectArray = mysqli_fetch_array($resultSelect, MYSQLI_ASSOC);
-//    }else{
-//       sqlErrorDisplay("/books/index.php");
-//    }
-
-
-//    return (int) $selectArray['PrivatePosts'];
-// }
 
 function checkStandardBooksLimit($conn, $email){
    $sqlSelectStandard = "SELECT BooksLimit FROM standard WHERE Email='$email'";
