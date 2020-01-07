@@ -9,7 +9,7 @@ if(isset($_POST['login'])){
     $email = htmlspecialchars($_POST['email']);
     $password = htmlspecialchars($_POST['password']);
     if($email != null && $password != null){
-        loginUser($conn, $_POST['email'], $_POST['password']);
+        loginUser($conn, $email, $password);
     }else{
         $_SESSION['errmessage'] = "Fill in all boxes";
     }

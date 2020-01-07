@@ -9,7 +9,8 @@ $profileData = false;
 
 if(isset($_SESSION['User'])){
     $premium = checkIfPremiumUser($conn, $_SESSION['User']);
-    $profileData = getProfileData($conn, getUsernameFromUsersTable($conn, $_SESSION['User']));
+    $username = getUsernameFromUsersTable($conn, $_SESSION['User']);
+    $profileData = getProfileData($conn, $username);
     if(isset($_POST['update'])){
         $bio = $_POST['bio'];
         $picture = $_POST['picture'];

@@ -21,8 +21,8 @@ if(isset($_POST['premium'])){
 
 //If user is on another person's profile:
 if(isset($_GET['user'])){
-    $profileData = getProfileData($conn, $_GET['user']);
     $username = htmlspecialchars($_GET['user']);
+    $profileData = getProfileData($conn, $username);
     $booksData = getAllUserBookReviews($conn, $username);
 }
 
