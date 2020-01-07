@@ -59,7 +59,9 @@ CREATE TABLE author (
 CREATE TABLE pages (
   ID int PRIMARY KEY AUTO_INCREMENT, -- Unique primary key for the total pages and pages read
   Page int NOT NULL, -- Current page the user is on
-  TotalPages int NOT NULL -- Total pages of the book
+  TotalPages int NOT NULL, -- Total pages of the book
+  CHECK(Page >= 0 and TotalPages >= 0),
+  CHECK(TotalPages >= Page)
 );
 
 CREATE TABLE comments (
@@ -140,7 +142,7 @@ INSERT INTO profile(Username,Bio,Picture) VALUES ('James','A chill user','profil
 
 INSERT INTO users(Email,Username,Hash) VALUES ('test@example.com', 'James', '$2y$10$8/5475dQSBAFEyOxRSonAu145ndf5vJGPXUArdglljPMr0.Iz7Jfq'); -- hash corresponds to password 'test12345'
 
-INSERT INTO standard(Email) VALUES('test@example.com');
+INSERT INTO standard(Email,BooksLimit,PrivateReviews) VALUES('test@example.com',4,1);
 
 INSERT INTO author(Name, DOB) VALUES('Jon', '1990-05-05');
 
@@ -148,7 +150,7 @@ INSERT INTO books(ISBN,Author,Title,DateReleased,Description,Picture) VALUES('97
 
 INSERT INTO pages(ID, TotalPages, Page) VALUES('1','200','200');
 
-INSERT INTO reviews(ID,ISBN,Review,Rating,Visible) VALUES('1','978-7-8322-9158-5','A nice book','7','true');
+INSERT INTO reviews(ID,ISBN,Review,Rating,Visible) VALUES('1','978-7-8322-9158-5','A nice book','7','false');
 
 INSERT INTO users_reviews(ID,ReviewID, Email, PageID) VALUES('1','1','test@example.com','1');
 

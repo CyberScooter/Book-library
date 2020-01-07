@@ -114,7 +114,7 @@ if(isset($_SESSION['successmessage'])){
                 <p><span class="Attributes">Author:</span> <?php echo $booksData[$i]['Author'] ?></p>
                 <p><span class="Attributes">Date released:</span> <?php echo $booksData[$i]['DateReleased'] ?></p>
                 <p><span class="Attributes">Read</span> <?php echo $booksData[$i]['Page'] ?> out of <?php echo $booksData[$i]['TotalPages'] ?> pages in the book</p>
-                <p <?php echo ($booksData[$i]['Visible']) ? 'class="Green"' : 'class="Red"' ?>><?php echo ($booksData[$i]['Visible']) ? 'Public review' : 'Private review' ?></p>
+                <p <?php echo ($booksData[$i]['Visible']) ? 'class="success"' : 'class="error"' ?>><?php echo ($booksData[$i]['Visible']) ? 'Public review' : 'Private review' ?></p>
                 <p><span class="Attributes">Created at :</span> <?php echo $booksData[$i]['created_at']?></p>
 
                 <?php if( (int) $booksData[$i]['Page'] == (int) $booksData[$i]['TotalPages']   ){ ?>

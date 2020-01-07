@@ -96,8 +96,6 @@ if(isset($_SESSION['successmessage'])){
     <!-- User session needs to be set in order to access profile-->
 <?php if(isset($_SESSION['User'])){ ?>
 
-    <h2 class="error"><?php echo $error ?></h2>
-
     <div class="container">
 
     <form action="index.php" method="GET">
@@ -125,6 +123,7 @@ if(isset($_SESSION['successmessage'])){
 
         <h2> Bio: <?php echo ($profileData['Bio'] == null) ? ((isset($_GET['user'])) ? 'Nothing to show' : 'No bio added, try adding one') : $profileData['Bio'] ?> </h2>
         <div class="Picture"><img class="ProfilePicture" src="<?php echo ($profileData['Picture'] != null) ? '/resources/profile-pictures/' . $profileData['Picture'] : '/resources/profile-pictures/default.png' ?>"/></div>
+        <p><?php echo (!isset($_GET['user'])) ? 'Account created at: ' . $profileData['created_at'] : null ?></p>
 
     <?php } ?>
 

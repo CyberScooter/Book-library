@@ -6,7 +6,7 @@
     $showReviewInputs = false;
     
     if(isset($_POST['submit'])){
-        $email = htmlspecialchars($_SESSION['User']);
+        $email = $_SESSION['User'];
         $isbn = htmlspecialchars($_POST['isbn']);
         $title = htmlspecialchars($_POST['title']);
         $releaseDate = htmlspecialchars($_POST['releasedDate']);
@@ -51,12 +51,7 @@
 
         if($pagesRead <= $totalPages && $email != null && $isbn != null && $title != null && $releaseDate && $description != null && $author != null && $authorDOB != null && $totalPages != null && $pagesRead != null){
 
-            if(checkIfStandardUser($conn, $_SESSION['User'])){
-                !$visible ? decrementPrivateReviews($conn, $_SESSION['User']) : NULL;
-                decrementStandardLimitReviews($conn, $_SESSION['User']);
-            }
             saveBookReview($conn, $email, $isbn, $title, $sqlReleaseDate, $description, $author, $sqlAuthorDOB, $totalPages, $pagesRead, $review, $rating, $picture, $visible);
-            $_SESSION['successmessage'] = "Book review succesfully added";
             header('Location: /books/index.php');
             exit();
         }
@@ -68,19 +63,12 @@
         unset($_SESSION['errmessage']); 
     } 
 
-    global $success; 
-    if(isset($_SESSION['successmessage'])){ 
-        $success = $_SESSION['successmessage']; 
-        unset($_SESSION['successmessage']); 
-    }
-
 ?>
 
 
 <?php include '../templates/header.php'; ?>
 
 <h1 class="error"><?php echo $error?></h1>
-<h1 class="success"><?php echo $success?></h1>
 
 <div class="container">
 
@@ -99,7 +87,7 @@
             <input class="TextBox" type="text" placeholder="Enter pages read" name="pagesRead">
             <h3>Checkbox should be ticked for book review to be public</h3>
             <input type="checkbox" name="visibility" value="visible" checked>Public</input>
-            <h3>Enter book cover image from 'books' folder in 'resources' folder to add a book cover: </h3>
+            <h3>Select a book cover image from 'books' folder in 'resources' folder to add a book cover: </h3>
             <input class="TextBox" type="file" name="fileinput"/>
             <?php if($showReviewInputs){ ?>
             <input class="TextBox" type="text" placeholder="Enter review" name="review">

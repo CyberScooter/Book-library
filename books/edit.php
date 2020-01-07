@@ -29,8 +29,10 @@ if(isset($_POST['submit'])){
             $previousVisibility = $_POST['previousVisibility'] == 'visible' ? true : false;
             if(!$visible){
                 decrementPrivateReviews($conn, $_SESSION['User']);
+                $_SESSION['successmessage'] = "Book review set to private";
             }else if(!$previousVisibility && $visible){
                 incrementPrivateReviews($conn, $_SESSION['User']);
+                $_SESSION['successmessage'] = "Book review set to public";
             }
         }
         if($rating > 10 || $rating < 0){
@@ -50,19 +52,11 @@ if(isset($_SESSION['errmessage'])){
     unset($_SESSION['errmessage']); 
 } 
 
-global $success; 
-if(isset($_SESSION['successmessage'])){ 
-    $success = $_SESSION['successmessage']; 
-    unset($_SESSION['successmessage']); 
-}
-
-
 ?>
 
 <?php include '../templates/header.php'; ?>
 
 <h1 class="error"><?php echo $error?></h1>
-<h1 class="success"><?php echo $success?></h1>
 
 <div class="container">
 

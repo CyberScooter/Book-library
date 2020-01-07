@@ -128,9 +128,7 @@ function checkPagesReadAndTotalPagesEqual($conn, $id, $email){
    }
    $pagesArray = mysqli_fetch_array($resultPages, MYSQLI_ASSOC);
 
-
    return (int) $pagesArray['Page'] == (int) $pagesArray['TotalPages'];
-
 }
 
 function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating, $picture, $visible){
@@ -151,14 +149,12 @@ function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description
          sqlError($conn);
       }
    }
-
    if(!checkExistingBook($conn, $email, $safeISBN)){
       $sqlInsertBook = "INSERT INTO books(ISBN, Author, Title, DateReleased, Description, Picture) VALUES('$safeISBN','$safeAuthor','$safeTitle','$releaseDate','$safeDescription','$safePicture')";
       if(!mysqli_query($conn, $sqlInsertBook)){
          sqlError($conn);
       }
    }
-
    if(!checkExistingReviewFromUser($conn, $email, $safeISBN)){
       $pageID;
       $reviewID;
@@ -180,9 +176,13 @@ function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description
       if(!mysqli_query($conn, $sqlInsertUsersReviews)){
          sqlError($conn);
       }
-
+      $_SESSION['successmessage'] = "Book review succesfully added";
+      if(checkIfStandardUser($conn, $email)){  //only decrement if standard user and book had been successfully added
+         !$visible ? decrementPrivateReviews($conn, $email) : NULL; //if not visible then decrement
+         decrementStandardLimitReviews($conn, $email); //decrement standard limit reviews as well
+     }
    }else{
-      $_SESSION['errmessage'] = "Book already exists!";
+      $_SESSION['errmessage'] = "Book ISBN already exists in your books list, could not add book!";
    }
    
 }
@@ -398,31 +398,31 @@ function deleteUserBookReview($conn, $email, $id, $isbn, $author){
          sqlError($conn);
       }
 
-      //if there is only one review which matches the input isbn
+      //if there is only one review which has the same ISBN inputted into function
       if(mysqli_num_rows($result) == 1){
 
          $sqlSelectAuthors = "SELECT * FROM books WHERE Author='$author'";
 
-         if($resultAuthor = mysqli_query($conn, $sqlSelectAuthors)){
+         if($resultAuthor = mysqli_query($conn, $sqlSelectAuthors)){ //select all books that belong to the author of the review that is being deleted
 
-            if(mysqli_num_rows($resultAuthor) > 1){
+            if(mysqli_num_rows($resultAuthor) > 1){ //if multiple other books are referenced by the author of the book in the review that is being deleted
 
-               $sqlDeleteBook = "DELETE FROM books WHERE ISBN='$isbn'";
+               $sqlDeleteBook = "DELETE FROM books WHERE ISBN='$isbn'"; //delete the book only
                if(!mysqli_query($conn, $sqlDeleteBook)){
                   sqlError($conn);
                }
-            }
+            }else{ //else 
 
-            $sqlDeleteBook = "DELETE FROM books WHERE ISBN='$isbn'";
-            if(!mysqli_query($conn, $sqlDeleteBook)){
-               sqlError($conn);
-            }
+               $sqlDeleteBook = "DELETE FROM books WHERE ISBN='$isbn'";//delete the book then after the author as well, as the author does belong to any book
+               if(!mysqli_query($conn, $sqlDeleteBook)){
+                  sqlError($conn);
+               }
 
-            $sqlDeleteAuthor = "DELETE FROM author WHERE Name='$author'";
-            if(!mysqli_query($conn, $sqlDeleteAuthor)){
-               sqlError($conn);
+               $sqlDeleteAuthor = "DELETE FROM author WHERE Name='$author'";
+               if(!mysqli_query($conn, $sqlDeleteAuthor)){
+                  sqlError($conn);
+               }
             }
-         
          }else{
             sqlError($conn);
          }
@@ -675,7 +675,7 @@ function getProfileData($conn, $username){
    $profileData = array();
 
    //returns username, bio, picture from profile where username is in the subquery, acts like an inner join
-   $sqlSelectSubQuery = "SELECT Username, Bio, Picture FROM profile WHERE Username IN (SELECT Username FROM users WHERE Email = '$email')";
+   $sqlSelectSubQuery = "SELECT * FROM profile WHERE Username IN (SELECT Username FROM users WHERE Email = '$email')";
    if(checkIfPremiumUser($conn, $email)){
       $sqlSelectBadge = "SELECT BadgeURL, BackgroundURL FROM premium WHERE Email='$email'";
       if(!$resultBadge = mysqli_query($conn, $sqlSelectBadge)){
@@ -820,7 +820,7 @@ function decrementPrivateReviews($conn, $email){
       }
    }else{
       $_SESSION['errmessage'] = "Private reviews limit reached";
-      header('Location: /profile/index.php');
+      header('Location: /books/index.php');
       exit();   
    }
 }
