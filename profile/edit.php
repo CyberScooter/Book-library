@@ -16,14 +16,11 @@ if(isset($_SESSION['User'])){
         if($premium){
             $backgroundImage = htmlspecialchars($_POST['bgImage']);
             $badge = htmlspecialchars($_POST['badge']);
-            //Delay in changing picture because it is making sure url is image
-            if(!@GetImageSize($backgroundImage)){
-                $backgroundImage = null;
-            }
-            if(!@GetImageSize($badge)){
-                $badge = null;
-            }
+            $backgroundImage == null ? $backgroundImage = $profileData['BackgroundURL'] : NULL;
+            $badge == null ? $badge = $profileData['BadgeURL'] : NULL;
         }
+        $picture == null ? $picture = $profileData['Picture'] : NULL;
+
         updateProfile($conn, $_SESSION['User'], $bio, $picture, $backgroundImage, $badge, $premium);
     }
 }
@@ -35,16 +32,17 @@ if(isset($_SESSION['User'])){
 <?php if(isset($_SESSION['User'])) { ?>
 
     <h1> Update Profile </h1>
-    <h3> There will be a short delay after update button is pressed </h3>
+    <h2 class="Red">For any file input left empty then last updated data from database is used</H2>
     
     <form action="edit.php" method="POST">
-        <input class="TextBox" type="text" placeholder="Enter new bio" name="bio" value="<?php echo $profileData['Bio'] ?>" >
-        <input class="TextBox" type="text" placeholder="Enter Web URL of new picture" name="picture" value = "<?php echo $profileData['Picture'] ?>">
+        <input class="TextBox" type="text" placeholder="Enter new bio" name="bio" value="<?php echo $profileData['Bio'] ?>">
+        <h2>Select any image file from the 'profile-pictures' folder in 'resources' folder to update profile picture:</h2>
+        <input class="TextBox" type="file" name="picture" >
         <?php if($premium){ ?>
-            <input class="TextBox" type="text" placeholder="Enter Web URL of new background picture" name="bgImage" 
-                value = "<?php echo (isset($_SESSION['bg-image'])) ? $_SESSION['bg-image'] : NULL?>">
-                Enter Badge file again:
-            <input class="TextBox" type="file" name="badge" value = "<?php echo $profileData['BadgeURL']?>"> 
+            <h2>Select any image file from the 'backgrounds' folder in 'resources' folder to update background: </h2>
+            <input class="TextBox" type="file" name="bgImage">
+            <h2>Select any image file from 'badges folder in 'resources' folder to update badge:</h2>
+            <input class="TextBox" type="file" name="badge"> 
         <?php } ?>
         <input class="Button" type="submit" name="update" value="Update">
     </form>

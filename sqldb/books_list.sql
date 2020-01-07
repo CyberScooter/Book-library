@@ -28,7 +28,7 @@ CREATE TABLE users_reviews (
 */
 CREATE TABLE reviews (
   ID int PRIMARY KEY AUTO_INCREMENT, -- Unique primary key for each record needed to allow access to a review later in PHP
-  ISBN varchar(13) NOT NULL, -- ISBN attribute stores isbn of the book has to be not null because will be referenced as foreign key to books isbn
+  ISBN varchar(20) NOT NULL, -- ISBN attribute stores isbn of the book has to be not null because will be referenced as foreign key to books isbn
   Review varchar(255), -- Review attribute stores the review of the book
   Rating int DEFAULT 0, -- Rating attribute stores the rating of the book
   Visible boolean, -- Visible attribute allows review to be public or private to other users
@@ -43,16 +43,16 @@ CREATE TABLE profile (
 );
 
 CREATE TABLE books (
-  ISBN varchar(13) PRIMARY KEY, -- stores ISBN of book
-  Author varchar(20) NOT NULL, -- Author attribute to be made as foreign key of Author table later in file
-  Title varchar(40) NOT NULL, -- Title of the book
+  ISBN varchar(20) PRIMARY KEY, -- stores ISBN of book
+  Author varchar(30) NOT NULL, -- Author attribute to be made as foreign key of Author table later in file
+  Title varchar(80) NOT NULL, -- Title of the book
   DateReleased date NOT NULL, -- Release date of the book
   Description varchar(255) NOT NULL, -- Description about the book
   Picture varchar(255) -- A picture of the book
 );
 
 CREATE TABLE author (
-  Name varchar(20) PRIMARY KEY, -- Name of the author
+  Name varchar(30) PRIMARY KEY, -- Name of the author
   DOB date NOT NULL -- Date of birth of the author
 );
 
@@ -72,7 +72,7 @@ CREATE TABLE comments (
 */
 CREATE TABLE posts (
   ID int PRIMARY KEY AUTO_INCREMENT,  -- Unique primary for comment posts
-  User varchar(10), -- User attribute to be foreign key of Email attribute in users table later in file
+  User varchar(35), -- User attribute to be foreign key of Email attribute in users table later in file
   CommentID int NOT NULL, -- CommentID to be foreign key of ID in comments table later in file
   ReviewID int NOT NULL, -- ReviewID to be foreign key of ID in reviews table later in file
   created_at datetime DEFAULT (now()) -- created_at attribute is supposed to set to the current time when data is inserted to other attributes by default
@@ -131,3 +131,27 @@ ALTER TABLE posts ADD FOREIGN KEY (User) REFERENCES users (Email);
 ALTER Table premium ADD FOREIGN KEY (Email) REFERENCES users (Email);
 
 ALTER Table standard ADD FOREIGN KEY (Email) REFERENCES users (Email);
+
+/*
+INSERT DUMMY DATA INTO TABLES
+*/
+
+INSERT INTO profile(Username,Bio,Picture) VALUES ('James','A chill user','profile1.png');
+
+INSERT INTO users(Email,Username,Hash) VALUES ('test@example.com', 'James', '$2y$10$8/5475dQSBAFEyOxRSonAu145ndf5vJGPXUArdglljPMr0.Iz7Jfq'); -- hash corresponds to password 'test12345'
+
+INSERT INTO standard(Email) VALUES('test@example.com');
+
+INSERT INTO author(Name, DOB) VALUES('Jon', '1990-05-05');
+
+INSERT INTO books(ISBN,Author,Title,DateReleased,Description,Picture) VALUES('978-7-8322-9158-5','Jon','A new later','2000-04-04','A book about a magnificient leopard','cover1.png');
+
+INSERT INTO pages(ID, TotalPages, Page) VALUES('1','200','200');
+
+INSERT INTO reviews(ID,ISBN,Review,Rating,Visible) VALUES('1','978-7-8322-9158-5','A nice book','7','true');
+
+INSERT INTO users_reviews(ID,ReviewID, Email, PageID) VALUES('1','1','test@example.com','1');
+
+INSERT INTO comments(ID,Comment) VALUES('1','Would recommend!');
+
+INSERT INTO posts(User, CommentID, ReviewID) VALUES('test@example.com','1','1');

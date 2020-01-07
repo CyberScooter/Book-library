@@ -23,7 +23,7 @@ function registerUser($conn, $email, $password, $passwordConfirmation, $username
       }
       if(mysqli_num_rows($result) == 0){
          //Stores password hash in database which in default uses bcrypt algorithm
-         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+         $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
          $sqlInsertUser = "INSERT INTO users(Email,Username,Hash) VALUES('$safeEmail','$safeUsername','$hashedPassword')";
          $sqlInsertProfile = "INSERT INTO profile(Username) VALUES('$safeUsername')";
          if(mysqli_query($conn, $sqlInsertProfile)){
@@ -678,7 +678,7 @@ function getProfileData($conn, $username){
    //returns username, bio, picture from profile where username is in the subquery, acts like an inner join
    $sqlSelectSubQuery = "SELECT Username, Bio, Picture FROM profile WHERE Username IN (SELECT Username FROM users WHERE Email = '$email')";
    if(checkIfPremiumUser($conn, $email)){
-      $sqlSelectBadge = "SELECT BadgeURL FROM premium WHERE Email='$email'";
+      $sqlSelectBadge = "SELECT BadgeURL, BackgroundURL FROM premium WHERE Email='$email'";
       if(!$resultBadge = mysqli_query($conn, $sqlSelectBadge)){
          sqlError($conn);
       }

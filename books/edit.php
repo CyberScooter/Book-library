@@ -54,9 +54,11 @@ if(isset($_POST['submit'])){
             <input id="FixedTextBox" class="TextBox" type="text" value="<?php echo $bookReviewData['Author'] ?>" placeholder="Enter author" readonly>
             <input id="FixedTextBox" class="TextBox" type="text" value="<?php echo $bookReviewData['DOB'] ?>" placeholder="Enter author DOB in (yyyy-mm-dd) format" readonly>
             <input id="FixedTextBox" class="TextBox" type="text" value="<?php echo $bookReviewData['TotalPages'] ?>" placeholder="Enter total pages" name="totalPages" readonly>
-            <input class="TextBox" type="text" value="<?php echo $bookReviewData['Page'] ?>" placeholder="Enter pages read" name="pagesRead">
-            
+            <h3>Checkbox should be ticked for review to be public</h3>
             <input type="checkbox" name="visibility" value="visible" <?php echo ($bookReviewData['Visible']) ? 'checked' : null ?>> Public </input>
+            <h3>If pages read is the same as total pages in book then rating and review feature is unlocked</h3>
+            <input class="TextBox" type="text" value="<?php echo $bookReviewData['Page'] ?>" placeholder="Enter pages read" name="pagesRead">
+
             <input type="hidden" name="previousVisiblity" value="<?php echo ($bookReviewData['Visible']) ? 'visible' : null ?>" >
 
             <?php if($showReviewInputs){ ?>

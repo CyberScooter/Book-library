@@ -88,7 +88,9 @@
             <input class="TextBox" type="text" placeholder="Enter author DOB in (dd-mm-yyyy) format" name="authorDOB">
             <input class="TextBox" type="text" placeholder="Enter total pages" name="totalPages">
             <input class="TextBox" type="text" placeholder="Enter pages read" name="pagesRead">
+            <h3>Checkbox should be ticked for book review to be public</h3>
             <input type="checkbox" name="visibility" value="visible" checked>Public</input>
+            <h3>Enter book cover image from 'books' folder in 'resources' folder to add a book cover: </h3>
             <input class="TextBox" type="file" name="fileinput"/>
             <?php if($showReviewInputs){ ?>
             <input class="TextBox" type="text" placeholder="Enter review" name="review">
