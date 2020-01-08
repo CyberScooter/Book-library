@@ -6,7 +6,7 @@ include "../config/db_connection.php";
 
 global $profileData;
 $profileData = false;
-
+//if user is logged in
 if(isset($_SESSION['User'])){
     $premium = checkIfPremiumUser($conn, $_SESSION['User']);
     $username = getUsernameFromUsersTable($conn, $_SESSION['User']);
@@ -50,7 +50,7 @@ if(isset($_SESSION['successmessage'])){
 <?php if(isset($_SESSION['User'])) { ?>
 
     <h1> Update Profile </h1>
-    <h2 class="Red">For any file input left empty then last updated data from database is used</H2>
+    <h2 class="Red">For any input left empty then last updated data from database is used</H2>
     
     <form action="edit.php" method="POST">
         <input class="TextBox" type="text" placeholder="Enter new bio" name="bio" value="<?php echo $profileData['Bio'] ?>">
@@ -71,4 +71,7 @@ if(isset($_SESSION['successmessage'])){
 
 <?php } ?>
 
-<?php include '../templates/footer.php'; ?>
+</div>
+    
+</body>
+</html>

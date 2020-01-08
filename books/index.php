@@ -188,7 +188,7 @@ if(isset($_SESSION['successmessage'])){
     
 <?php } ?>
 
-
-
-
-<?php include '../templates/footer.php'; ?>
+</div>
+    
+</body>
+</html>

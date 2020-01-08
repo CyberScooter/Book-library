@@ -40,7 +40,7 @@ if(isset($_POST['submit'])){
             header('Location: edit.php');
             exit();
         }else{
-            $bookReviewData = updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, $visible);
+            updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, $visible);
             header('Location: /books/index.php');
         }
     }
@@ -92,4 +92,7 @@ if(isset($_SESSION['errmessage'])){
 
     <?php } ?>
 
-<?php include '../templates/footer.php'; ?>
+</div>
+
+</body>
+</html>

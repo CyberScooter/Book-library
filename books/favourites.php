@@ -73,3 +73,8 @@ if(isset($_SESSION['successmessage'])){
 <?php } else { ?>
     <h1> Login/register required </h1>
 <?php } ?>
+
+</div>
+    
+</body>
+</html>

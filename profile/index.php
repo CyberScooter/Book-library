@@ -108,7 +108,7 @@ if(isset($_SESSION['successmessage'])){
 
         <!-- Displays specific data based on whether the user is on their own profile or someone else's -->
         
-        <!-- @GetImageSize causes a delay when updating images because it is opening up the image beforehand to make sure it is an image -->
+        
 
         <hr> 
         <h1><?php echo (isset($_GET['user']) ? 'User: ' : 'Welcome ')?> <?php echo $profileData['Username'] ?> </h1>
@@ -233,4 +233,7 @@ if(isset($_SESSION['successmessage'])){
     
 <?php } ?>
 
-<?php include '../templates/footer.php'; ?>
+</div>
+    
+</body>
+</html>

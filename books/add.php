@@ -4,7 +4,7 @@
     include "../config/db_connection.php";
 
     $showReviewInputs = false;
-    
+    //if submit button is pressed
     if(isset($_POST['submit'])){
         $email = $_SESSION['User'];
         $isbn = htmlspecialchars($_POST['isbn']);
@@ -100,4 +100,7 @@
 
     <?php } ?>
 
-<?php include '../templates/footer.php'; ?>
+</div>
+
+</body>
+</html>

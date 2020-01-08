@@ -440,6 +440,8 @@ function deleteUserBookReview($conn, $email, $id, $isbn, $author, $visible){
    }
 }
 
+
+
 function addBookToFavourite($conn, $email, $reviewID){
    $sqlInsertFavourites = "INSERT INTO favourites(Email,ReviewID) VALUES('$email','$reviewID')";
    if(!mysqli_query($conn, $sqlInsertFavourites)){
@@ -455,7 +457,7 @@ function addBookToFavourite($conn, $email, $reviewID){
 function selectAllFavouriteBooks($conn, $email){
    $favouriteBooksData = array();
 
-   $sqlSelectFavouriteBooks = "SELECT ReviewID FROM favourites";
+   $sqlSelectFavouriteBooks = "SELECT ReviewID FROM favourites WHERE Email='$email'";
    if(!$resultFavouriteBooks = mysqli_query($conn, $sqlSelectFavouriteBooks)){
       sqlError($conn);
    }
@@ -817,7 +819,7 @@ function decrementPrivateReviews($conn, $email){
          sqlError($conn);
       }
    }else{
-      $_SESSION['errmessage'] = "Private reviews limit reached";
+      $_SESSION['errmessage'] = "Private reviews limit reached, could not add book";
       header('Location: /books/index.php');
       exit();   
    }
@@ -846,20 +848,6 @@ function checkStandardBooksLimit($conn, $email){
       sqlError($conn);
    }
    return ((int) $selectArray['BooksLimit'] != 0);
-}
-
-function checkPrivatePostsLimit($conn, $email){
-   $sqlSelectPrivate = "SELECT PrivateReviews FROM standard WHERE Email='$email'";
-   if($resultSelect = mysqli_query($conn, $sqlSelectPrivate)){
-      $selectArray = mysqli_fetch_array($resultSelect, MYSQLI_ASSOC);
-   }else {
-      sqlError($conn);
-   }
-   if((int) $selectArray['PrivateReviews'] == 0){
-      $_SESSION['errmessage'] = "Private reviews limit reached";
-      header('Location: /books/index.php');
-      exit();   
-   }
 }
 
 //=================================================================================================================================================================

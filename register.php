@@ -61,4 +61,7 @@ if(isset($_SESSION['errmessage'])){
     
 <?php } ?>
 
-<?php include './templates/footer.php'; ?>
+</div>
+    
+</body>
+</html>

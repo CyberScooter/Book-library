@@ -60,4 +60,7 @@ if(isset($_SESSION['successmessage'])){
     <h1> In order to start using the site please register or login above! </h1>
 <?php } ?>
 
-<?php include './templates/footer.php'; ?>
+</div>
+    
+</body>
+</html>

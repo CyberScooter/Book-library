@@ -6,7 +6,7 @@ include "./config/db_connection.php";
 
 // If login button is pressed
 if(isset($_POST['login'])){
-    $email = htmlspecialchars($_POST['email']);
+    $email = htmlspecialchars($_POST['email']); 
     $password = htmlspecialchars($_POST['password']);
     if($email != null && $password != null){
         loginUser($conn, $email, $password);
@@ -45,4 +45,7 @@ if(isset($_SESSION['errmessage'])){
 
 <?php } ?>
 
-<?php include './templates/footer.php'; ?>
+</div>
+    
+</body>
+</html>
