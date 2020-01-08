@@ -36,7 +36,7 @@ if(isset($_POST['submit'])){
             }
         }
         if($rating > 10 || $rating < 0){
-            $_SESSION['errmessage'] = "Invalid rating please try, rating should be between 0-10";
+            $_SESSION['errmessage'] = "Invalid rating please try, rating should be between 0-10 or Pages read is too high";
             header('Location: edit.php');
             exit();
         }else{
@@ -44,6 +44,8 @@ if(isset($_POST['submit'])){
             header('Location: /books/index.php');
         }
     }
+    header('Location: /books/index.php');
+    exit();
 }
 
 global $error; 
@@ -76,7 +78,7 @@ if(isset($_SESSION['errmessage'])){
             <h3>If pages read is the same as total pages in book then rating and review feature is unlocked</h3>
             <input class="TextBox" type="text" value="<?php echo $bookReviewData['Page'] ?>" placeholder="Enter pages read" name="pagesRead">
 
-            <input type="hidden" name="previousVisiblity" value="<?php echo ($bookReviewData['Visible']) ? 'visible' : null ?>" >
+            <input type="hidden" name="previousVisibility" value="<?php echo ($bookReviewData['Visible']) ? 'visible' : null ?>" >
 
             <?php if($showReviewInputs){ ?>
             <input class="TextBox" type="text" value="<?php echo $bookReviewData['Review'] ?>" placeholder="Enter review" name="review">

@@ -30,7 +30,8 @@ if(isset($_POST['deleteBook'])){
     $deleteISBN = $_POST['deleteISBN'];
     $deleteReviewID = $_POST['deleteReviewID'];
     $deleteAuthor = $_POST['deleteAuthor'];
-    deleteUserBookReview($conn, $_SESSION['User'], $deleteReviewID, $deleteISBN, $deleteAuthor);
+    $visible = $_POST['visible'];
+    deleteUserBookReview($conn, $_SESSION['User'], $deleteReviewID, $deleteISBN, $deleteAuthor, $visible);
     $_SESSION['successmessage'] = "Book review successfully removed";
     header('Location: index.php');
     exit();
@@ -128,6 +129,7 @@ if(isset($_SESSION['successmessage'])){
                     <input type="hidden" name="deleteISBN" value="<?php echo $booksData[$i]['ISBN'] ?>">
                     <input type="hidden" name="deleteReviewID" value="<?php echo $booksData[$i]['ReviewID'] ?>">
                     <input type="hidden" name="deleteAuthor" value="<?php echo $booksData[$i]['Author'] ?>">
+                    <input type="hidden" name="visible" value="<?php echo $booksData[$i]['Visible'] ?>">
                 </form>
 
                 <?php if(!checkFavouriteBook($conn, $_SESSION['User'], $booksData[$i]['ReviewID'])) {?>

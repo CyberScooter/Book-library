@@ -127,10 +127,8 @@ function checkPagesReadAndTotalPagesEqual($conn, $id, $email){
       sqlError($conn);
    }
    $pagesArray = mysqli_fetch_array($resultPages, MYSQLI_ASSOC);
-
    return (int) $pagesArray['Page'] == (int) $pagesArray['TotalPages'];
 }
-
 function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description, $author, $authorDOB, $totalPages, $pagesRead, $review, $rating, $picture, $visible){
    $safeReleaseDate = mysqli_real_escape_string($conn, $releaseDate);
    $safeAuthorDOB = mysqli_real_escape_string($conn, $authorDOB);
@@ -142,6 +140,11 @@ function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description
    $safePagesRead = mysqli_real_escape_string($conn, $pagesRead);
    $safeReview = mysqli_real_escape_string($conn, $review);
    $safeAuthor = mysqli_real_escape_string($conn, $author);
+
+   if(checkIfStandardUser($conn, $email)){  //only decrement if standard user and book had been successfully added
+      !$visible ? decrementPrivateReviews($conn, $email) : NULL; //if not visible then decrement and check in decrement
+      decrementStandardLimitReviews($conn, $email); //decrement standard limit reviews as well
+   }
 
    if(!checkExistingAuthor($conn, $email, $safeAuthor)){
       $sqlInsertAuthor = "INSERT INTO author(Name, DOB) VALUES('$safeAuthor', '$authorDOB')";
@@ -164,28 +167,25 @@ function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description
       }else{
          sqlError($conn);
       }
-   
+      
       $sqlInsertReview = "INSERT INTO reviews(ISBN,Review,Rating,Visible) VALUES('$safeISBN','$safeReview','$rating','$visible')";
       if (mysqli_query($conn, $sqlInsertReview)) {
          $reviewID = mysqli_insert_id($conn);
       }else{
          sqlError($conn);
       }
-   
+
       $sqlInsertUsersReviews = "INSERT INTO users_reviews(ReviewID, Email, PageID) VALUES('$reviewID','$email','$pageID')";
       if(!mysqli_query($conn, $sqlInsertUsersReviews)){
          sqlError($conn);
       }
-      $_SESSION['successmessage'] = "Book review succesfully added";
-      if(checkIfStandardUser($conn, $email)){  //only decrement if standard user and book had been successfully added
-         !$visible ? decrementPrivateReviews($conn, $email) : NULL; //if not visible then decrement
-         decrementStandardLimitReviews($conn, $email); //decrement standard limit reviews as well
-     }
+      
+     $_SESSION['successmessage'] = "Book review succesfully added";
    }else{
-      $_SESSION['errmessage'] = "Book ISBN already exists in your books list, could not add book!";
-   }
-   
+      $_SESSION['errmessage'] = "Book ISBN already exists in your books list, could not add book!"; 
+   }  
 }
+
 
 
 /**
@@ -340,7 +340,7 @@ function updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, 
  * It also goes through further checking to make sure that if the author is also being used by other existing users then keep 
  * it in the database else delete
  */
-function deleteUserBookReview($conn, $email, $id, $isbn, $author){
+function deleteUserBookReview($conn, $email, $id, $isbn, $author, $visible){
    $sqlSelectISBNReviews = "SELECT * FROM reviews WHERE ISBN = '$isbn'";
    if($result = mysqli_query($conn, $sqlSelectISBNReviews)){
 
@@ -429,11 +429,9 @@ function deleteUserBookReview($conn, $email, $id, $isbn, $author){
 
       }
 
-      $reviewArray = mysqli_fetch_array($result, MYSQLI_ASSOC);
-      if(checkIfStandardUser($conn, $email) && !$reviewArray['visible']){
+      if(checkIfStandardUser($conn, $email) && !$visible){
          incrementPrivateReviews($conn, $email);
       }
-
       if(checkIfStandardUser($conn, $email)){
          incrementStandardLimitReviews($conn, $email);
       }
@@ -806,16 +804,16 @@ function decrementStandardLimitReviews($conn, $email){
  */
 
 function decrementPrivateReviews($conn, $email){
-   $sqlSelectStandard = "SELECT PrivateReviews FROM standard WHERE Email='$email'";
-   if($resultSelect = mysqli_query($conn, $sqlSelectStandard)){
+   $sqlSelectPrivate = "SELECT PrivateReviews FROM standard WHERE Email='$email'";
+   if($resultSelect = mysqli_query($conn, $sqlSelectPrivate)){
       $selectArray = mysqli_fetch_array($resultSelect, MYSQLI_ASSOC);
    }else{
       sqlError($conn);
    }
    $privateReviews = (int) $selectArray['PrivateReviews'] - 1;
    if($privateReviews >= 0){
-      $sqlUpdateStandard = "UPDATE standard SET PrivateReviews='$privateReviews' WHERE Email = '$email'";
-      if(!$resultUpdate = mysqli_query($conn, $sqlUpdateStandard)){
+      $sqlUpdatePrivate = "UPDATE standard SET PrivateReviews='$privateReviews' WHERE Email = '$email'";
+      if(!$resultUpdate = mysqli_query($conn, $sqlUpdatePrivate)){
          sqlError($conn);
       }
    }else{
@@ -826,16 +824,16 @@ function decrementPrivateReviews($conn, $email){
 }
 
 function incrementPrivateReviews($conn, $email){
-   $sqlSelectStandard = "SELECT PrivateReviews FROM standard WHERE Email='$email'";
-   if($resultSelect = mysqli_query($conn, $sqlSelectStandard)){
+   $sqlSelectPrivate = "SELECT PrivateReviews FROM standard WHERE Email='$email'";
+   if($resultSelect = mysqli_query($conn, $sqlSelectPrivate)){
       $selectArray = mysqli_fetch_array($resultSelect, MYSQLI_ASSOC);
    }else{
       sqlError($conn);
    }
 
    $privateReviews = (int) $selectArray['PrivateReviews'] + 1;
-   $sqlUpdateStandard = "UPDATE standard SET PrivateReviews='$privateReviews' WHERE Email = '$email'";
-   if(!$resultUpdate = mysqli_query($conn, $sqlUpdateStandard)){
+   $sqlUpdatePrivate = "UPDATE standard SET PrivateReviews='$privateReviews' WHERE Email = '$email'";
+   if(!$resultUpdate = mysqli_query($conn, $sqlUpdatePrivate)){
       sqlError($conn);
    }
 }
@@ -848,6 +846,20 @@ function checkStandardBooksLimit($conn, $email){
       sqlError($conn);
    }
    return ((int) $selectArray['BooksLimit'] != 0);
+}
+
+function checkPrivatePostsLimit($conn, $email){
+   $sqlSelectPrivate = "SELECT PrivateReviews FROM standard WHERE Email='$email'";
+   if($resultSelect = mysqli_query($conn, $sqlSelectPrivate)){
+      $selectArray = mysqli_fetch_array($resultSelect, MYSQLI_ASSOC);
+   }else {
+      sqlError($conn);
+   }
+   if((int) $selectArray['PrivateReviews'] == 0){
+      $_SESSION['errmessage'] = "Private reviews limit reached";
+      header('Location: /books/index.php');
+      exit();   
+   }
 }
 
 //=================================================================================================================================================================
