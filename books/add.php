@@ -91,7 +91,7 @@
             <input class="TextBox" type="file" name="fileinput"/>
             <?php if($showReviewInputs){ ?>
             <input class="TextBox" type="text" placeholder="Enter review" name="review">
-            <input class="TextBox" type="text" placeholder="Enter rating" name="rating">
+            <input class="TextBox" type="text" placeholder="Enter rating between 0-10" name="rating">
             <?php } ?>
             <input class="Search" type="submit" name="submit" value="Add book"> 
         </form>

@@ -59,7 +59,7 @@ if(isset($_SESSION['successmessage'])){
         <?php if($premium){ ?>
             <h2>Select any image file from the 'backgrounds' folder in 'resources' folder to update background: </h2>
             <input class="TextBox" type="file" name="bgImage">
-            <h2>Select any image file from 'badges folder in 'resources' folder to update badge:</h2>
+            <h2>Select any image file from 'badges' folder in 'resources' folder to update badge:</h2>
             <input class="TextBox" type="file" name="badge"> 
         <?php } ?>
         <input class="Button" type="submit" name="update" value="Update">

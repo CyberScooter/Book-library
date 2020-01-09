@@ -17,7 +17,7 @@ if(isset($_POST['submit'])){
     $pagesRead = htmlspecialchars($_POST['pagesRead']);
     $totalPages = htmlspecialchars($_POST['totalPages']);
     $visible = $_POST['visibility'] == 'visible' ? true : false;
-    if((int) $pagesRead <= (int) $totalPages && $pagesRead >= 0){
+    if((int) $pagesRead <= (int) $totalPages && (int) $pagesRead >= 0){
         if(isset($_POST['review'])){
             $review = htmlspecialchars($_POST['review']);
             $rating = htmlspecialchars($_POST['rating']);
@@ -25,25 +25,28 @@ if(isset($_POST['submit'])){
             $review = NULL;
             $rating = 0;
         }
+        if((int) $rating > 10 || (int)  $rating < 0){
+            $_SESSION['errmessage'] = "Invalid rating please try again, rating should be between 0-10";
+            header('Location: index.php');
+            exit();
+        }
         if(checkIfStandardUser($conn, $_SESSION['User'])){
             $previousVisibility = $_POST['previousVisibility'] == 'visible' ? true : false;
-            if(!$visible){
-                decrementPrivateReviews($conn, $_SESSION['User']);
-                $_SESSION['successmessage'] = "Book review set to private";
-            }else if(!$previousVisibility && $visible){
-                incrementPrivateReviews($conn, $_SESSION['User']);
-                $_SESSION['successmessage'] = "Book review set to public";
+            if($visible != $previousVisibility){ //if visibility option has changed from before
+                if(!$visible){
+                    decrementPrivateReviews($conn, $_SESSION['User']);
+                    $_SESSION['successmessage'] = "Book review set to private";
+                }else if(!$previousVisibility && $visible){
+                    incrementPrivateReviews($conn, $_SESSION['User']);
+                    $_SESSION['successmessage'] = "Book review set to public";
+                }
             }
         }
-        if($rating > 10 || $rating < 0){
-            $_SESSION['errmessage'] = "Invalid rating please try, rating should be between 0-10 or Pages read is too high";
-            header('Location: edit.php');
-            exit();
-        }else{
-            updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, $visible);
-            header('Location: /books/index.php');
-        }
+        updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, $visible);
+        header('Location: /books/index.php');
+        exit();
     }
+    $_SESSION['errmessage'] = "Invalid pages read, could not update book";
     header('Location: /books/index.php');
     exit();
 }
@@ -82,7 +85,7 @@ if(isset($_SESSION['errmessage'])){
 
             <?php if($showReviewInputs){ ?>
             <input class="TextBox" type="text" value="<?php echo $bookReviewData['Review'] ?>" placeholder="Enter review" name="review">
-            <input class="TextBox" type="text" value="<?php echo $bookReviewData['Rating'] ?>" placeholder="Enter rating" name="rating">
+            <input class="TextBox" type="text" value="<?php echo $bookReviewData['Rating'] ?>" placeholder="Enter rating between 0-10" name="rating">
             <?php } ?>
             <input type="hidden" name="id" value="<?php echo $bookReviewID; ?>">
             <input class="Search" type="submit" name="submit" value="Update book"> 

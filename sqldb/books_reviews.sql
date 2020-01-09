@@ -1,6 +1,6 @@
 
-CREATE DATABASE books_list;
-USE books_list;
+CREATE DATABASE books_reviews; -- creates a new database called books_reviews
+USE books_reviews; -- uses the database in order to add tables
 
 /*
   Stores the different users that will be using the website, table is needed for registration purposes and being able to link

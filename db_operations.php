@@ -819,7 +819,7 @@ function decrementPrivateReviews($conn, $email){
          sqlError($conn);
       }
    }else{
-      $_SESSION['errmessage'] = "Private reviews limit reached, could not add book";
+      $_SESSION['errmessage'] = "Private reviews limit reached, could not add/update book";
       header('Location: /books/index.php');
       exit();   
    }

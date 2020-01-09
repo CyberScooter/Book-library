@@ -52,11 +52,11 @@ if(isset($_SESSION['successmessage'])){
 <?php if(isset($_SESSION['User'])){ ?>
     <div class="container">
         <h1> Welcome <span class="User"><?php echo $username ?></span> to the Books list </h1>
-        <h1> A place to store reviews for books and manage the books you are reading!</h1>
+        <h1> A social place to store reviews for books and manage the books you are reading!</h1>
     </div>
 <?php } else { ?>
     <h1> Welcome to the Books list </h1>
-    <h1> A place to store reviews for books and manage the books you are reading!</h1>
+    <h1> A social place to store reviews for books and manage the books you are reading!</h1>
     <h1> In order to start using the site please register or login above! </h1>
 <?php } ?>
 
