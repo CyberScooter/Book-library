@@ -151,15 +151,12 @@ if(isset($_SESSION['successmessage'])){
         
             <div class="BookReview">
 
-            <!-- This if statement below determines access privileges to view the books displayed on the page 
-                Certain constraints need to be made for instance if there was a the case that a user makes their book private it should not be seen by anyone else except themselves 
-                The first part of the if statement makes sure that the book is visible and the user is on their own profile 
-                The second part of the if statement makes sure that the if the book is on private and the user is on their own profile then the book should be seen as it is their own 
+            <!-- The if statement below determines access privileges to view the books displayed on the page 
 
-                If current user uses to find their own books using this page then it should display the books as someone else viewing their profile 
+                This will only display the public books for a user
             -->
 
-            <?php if(($booksData[$i]['Visible'] && isset($_GET['user'])) || ($booksData[$i]['Visible'] && !isset($_GET['user'])) || (!$booksData[$i]['Visible'] && !isset($_GET['user']))  ){ ?>
+            <?php if(($booksData[$i]['Visible'])){ ?>
                 
                 <p><span class="Attributes"> ISBN:</span> <?php echo $booksData[$i]['ISBN'] ?></p>
                 <p><span class="Attributes"> Title:</span> <?php echo $booksData[$i]['Title'] ?></p>
