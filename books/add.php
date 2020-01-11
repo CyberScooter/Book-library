@@ -55,7 +55,9 @@
             header('Location: /books/index.php');
             exit();
         }
-
+        $_SESSION['errmessage'] = "Not all fields filled in or pages read is greater than total pages";
+        header('Location: add.php');
+        exit();
     }
     global $error; 
     if(isset($_SESSION['errmessage'])){ 

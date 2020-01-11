@@ -1,7 +1,7 @@
 
 <?php
 /*
-   - The '$conn' parameter is passed in from the config file as an argument to each of these functions when they're called
+   - The '$conn' parameter is passed in from the db_connection.php file from config folder as an argument to each of these functions when they're called
    - mysqli_real_escape_string function used to prevent sql injection, only used on some functions where it is absolutely essential because of user input
    - Error handling function created at end of file that takes in an argument of the connection and calls the 'die' keyword to terminate the current script and output
      a message
@@ -67,8 +67,8 @@ function loginUser($conn, $email, $password){
       $_SESSION['User'] = $email;
       header('Location: index.php');
       exit();
-   }
-   $_SESSION['errmessage'] = 'User does not exist';
+   }else{}
+   $_SESSION['errmessage'] = 'User does not exist or password entered incorrectly';
    header('Location: login.php');
    exit();
 }
@@ -180,7 +180,7 @@ function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description
          sqlError($conn);
       }
       
-     $_SESSION['successmessage'] = "Book review succesfully added";
+     $_SESSION['successmessage'] = "Book review succesfully added to your list";
    }else{
       $_SESSION['errmessage'] = "Book ISBN already exists in your books list, could not add book!"; 
    }  
@@ -197,7 +197,7 @@ function getAllUserBookReviews($conn, $username){
    $safeUsername = mysqli_real_escape_string($conn, $username);
    $booksData = array();
 
-   $sqlSelectUsersReviews = "SELECT users_reviews.* FROM users INNER JOIN users_reviews ON users.Email = users_reviews.Email WHERE users.Username='$safeUsername'";
+   $sqlSelectUsersReviews = "SELECT users_reviews.* FROM users INNER JOIN users_reviews ON users.Email = users_reviews.Email WHERE users.Username='$safeUsername' ORDER BY created_at DESC";
    if(!$resultUserReviews = mysqli_query($conn, $sqlSelectUsersReviews)){
       sqlError($conn);
    }
@@ -615,8 +615,8 @@ function getUsernameFromUsersTable($conn, $email){
 }
 
 function getEmailFromUsersTable($conn, $username){
-   $sqlSelectSubQuery = "SELECT Email FROM users WHERE Username ='$username'";
-   if(!$result = mysqli_query($conn, $sqlSelectSubQuery)){
+   $sqlSelect = "SELECT Email FROM users WHERE Username ='$username'";
+   if(!$result = mysqli_query($conn, $sqlSelect)){
       sqlError($conn);
    }
    $userArray = mysqli_fetch_array($result, MYSQLI_ASSOC);
