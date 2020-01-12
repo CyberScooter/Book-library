@@ -52,6 +52,7 @@
         if($pagesRead <= $totalPages && $email != null && $isbn != null && $title != null && $releaseDate && $description != null && $author != null && $authorDOB != null && $totalPages != null && $pagesRead != null){
             $visible = $_POST['visibility'] == 'visible' ? true : false;
             saveBookReview($conn, $email, $isbn, $title, $sqlReleaseDate, $description, $author, $sqlAuthorDOB, $totalPages, $pagesRead, $review, $rating, $picture, $visible);
+            mysqli_close($conn);
             header('Location: /books/index.php');
             exit();
         }

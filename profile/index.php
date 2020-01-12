@@ -41,7 +41,7 @@ if(isset($_POST['addComment'])){
     if($comment != null){
         insertNewComment($conn, $_SESSION['User'], $id, $comment);
     }
-
+    mysqli_close($conn);
     //Handles redirection, if POST variable below is not null then it redirects to other users website
     //else their own. This is determined via the hidden input in the form below
     if($_POST['user'] != null){
@@ -55,7 +55,7 @@ if(isset($_POST['addComment'])){
 if(isset($_POST['deleteComment'])){
     $id = $_POST['postIDToDelete'];
     deleteComment($conn, $_SESSION['User'], $id);
-
+    mysqli_close($conn);
     //Handles redirection, if POST variable below is not null then it redirects to other users website
     //else their own. This is determined via the hidden input in the form below
     $_SESSION['successmessage'] = "Comment successfully removed";

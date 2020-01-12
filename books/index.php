@@ -32,6 +32,7 @@ if(isset($_POST['deleteBook'])){
     $deleteAuthor = $_POST['deleteAuthor'];
     $visible = $_POST['visible'];
     deleteUserBookReview($conn, $_SESSION['User'], $deleteReviewID, $deleteISBN, $deleteAuthor, $visible);
+    mysqli_close($conn);
     $_SESSION['successmessage'] = "Book review successfully removed";
     header('Location: index.php');
     exit();
@@ -39,6 +40,7 @@ if(isset($_POST['deleteBook'])){
 
 if(isset($_POST['favouriteBook'])){
     addBookToFavourite($conn, $_SESSION['User'], $_POST['ReviewID']);
+    mysqli_close($conn);
     $_SESSION['successmessage'] = "Added book review to favourites";
     header('Location: favourites.php');
     exit();
@@ -50,7 +52,7 @@ if(isset($_POST['addComment'])){
     if($comment != null){
         insertNewComment($conn, $_SESSION['User'], $id, $comment);
     }
-
+    mysqli_close($conn);
     //Handles redirection, if POST variable below is not null then it redirects to other users website
     //else their own. This is determined via the hidden input in the form below
     if($_POST['user'] != null){
@@ -64,7 +66,7 @@ if(isset($_POST['addComment'])){
 if(isset($_POST['deleteComment'])){
     $id = $_POST['postIDToDelete'];
     deleteComment($conn, $_SESSION['User'], $id);
-
+    mysqli_close($conn);
     //Handles redirection, if POST variable below is not null then it redirects to other users website
     //else their own. This is determined via the hidden input in the form below
     $_SESSION['successmessage'] = "Comment successfully removed";

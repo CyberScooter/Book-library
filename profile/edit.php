@@ -23,6 +23,7 @@ if(isset($_SESSION['User'])){
         $picture == null ? $picture = $profileData['Picture'] : NULL;
 
         updateProfile($conn, $_SESSION['User'], $bio, $picture, $backgroundImage, $badge, $premium);
+        mysqli_close($conn);
     }
 }
 

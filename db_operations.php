@@ -141,7 +141,7 @@ function saveBookReview($conn, $email, $isbn, $title, $releaseDate, $description
    $safeReview = mysqli_real_escape_string($conn, $review);
    $safeAuthor = mysqli_real_escape_string($conn, $author);
 
-   if(checkIfStandardUser($conn, $email)){  //only decrement if standard user and book had been successfully added
+   if(checkIfStandardUser($conn, $email) && !checkExistingBook($conn, $email, $safeISBN)){  //only decrement if standard user and book doesnt exist in the database
       !$visible ? decrementPrivateReviews($conn, $email) : NULL; //if not visible then decrement and check in decrement
       decrementStandardLimitReviews($conn, $email); //decrement standard limit reviews as well
    }

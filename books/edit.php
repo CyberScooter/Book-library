@@ -43,6 +43,7 @@ if(isset($_POST['submit'])){
             }
         }
         updateUserBookReview($conn, $email, $id, $pagesRead, $review, $rating, $visible);
+        mysqli_close($conn);
         header('Location: /books/index.php');
         exit();
     }

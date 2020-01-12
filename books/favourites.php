@@ -11,6 +11,7 @@ if(isset($_SESSION['User'])){
 
 if(isset($_POST['deleteFavourite'])){
     deleteFromFavourites($conn, $_SESSION['User'], $_POST['deleteReviewID']);
+    mysqli_close($conn);
     $_SESSION['successmessage'] = "Successfully removed book review from favourites";
     header('Location: favourites.php');
     exit();
