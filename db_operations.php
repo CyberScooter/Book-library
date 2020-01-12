@@ -1,6 +1,6 @@
 
 <?php
-/*
+/* - Close for sql some used here and some in the other php files
    - The '$conn' parameter is passed in from the db_connection.php file from config folder as an argument to each of these functions when they're called
    - mysqli_real_escape_string function used to prevent sql injection, only used on some functions where it is absolutely essential because of user input
    - Error handling function created at end of file that takes in an argument of the connection and calls the 'die' keyword to terminate the current script and output
@@ -39,12 +39,12 @@ function registerUser($conn, $email, $password, $passwordConfirmation, $username
             sqlError($conn);
          }  
       }
-      $_SESSION['errmessage'] = "User already exists";
+      $_SESSION['errmessage'] = "User already exists"; mysqli_close($conn);
       header('Location: register.php');
       exit();
    }
    
-   $_SESSION['errmessage'] = "Password does not match";
+   $_SESSION['errmessage'] = "Password does not match"; mysqli_close($conn);
    header('Location: register.php');
    exit();
 }
@@ -67,8 +67,8 @@ function loginUser($conn, $email, $password){
       $_SESSION['User'] = $email;
       header('Location: index.php');
       exit();
-   }else{}
-   $_SESSION['errmessage'] = 'User does not exist or password entered incorrectly';
+   }
+   $_SESSION['errmessage'] = 'User does not exist or password entered incorrectly'; mysqli_close($conn);
    header('Location: login.php');
    exit();
 }
